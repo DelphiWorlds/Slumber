@@ -69,14 +69,14 @@ object HeaderView: THeaderView
     Margins.Left = 8.000000000000000000
     Position.X = 49.000000000000000000
     Position.Y = 4.000000000000000000
-    Size.Width = 172.000000000000000000
+    Size.Width = 200.000000000000000000
     Size.Height = 38.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 3
     object HeaderKindComboBox: TComboBox
       Align = VertCenter
       Position.Y = 6.000000000000000000
-      Size.Width = 172.000000000000000000
+      Size.Width = 200.000000000000000000
       Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
@@ -98,7 +98,7 @@ object HeaderView: THeaderView
     Align = Client
     Margins.Left = 12.000000000000000000
     Margins.Right = 12.000000000000000000
-    Size.Width = 430.000000000000000000
+    Size.Width = 402.000000000000000000
     Size.Height = 38.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
@@ -107,7 +107,7 @@ object HeaderView: THeaderView
       Align = VertCenter
       TabOrder = 0
       Position.Y = 6.000000000000000000
-      Size.Width = 430.000000000000000000
+      Size.Width = 402.000000000000000000
       Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       OnChangeTracking = HeaderValueEditChangeTracking
