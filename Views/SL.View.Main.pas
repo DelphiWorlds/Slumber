@@ -50,6 +50,7 @@ type
     procedure HeaderViewDeleteHandler(Sender: TObject);
     procedure NewRequest(const AURL: string = '');
     procedure SendRequest;
+    procedure TestAddAuthorization;
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -65,6 +66,9 @@ uses
   DW.JSON,
   SL.View.Header, SL.Consts, SL.Resources;
 
+const
+  cGithubAPISearchRepos = 'https://api.github.com/search/repositories?q=user:DelphiWorlds';
+
 { TMainView }
 
 constructor TMainView.Create(AOwner: TComponent);
@@ -72,6 +76,7 @@ begin
   inherited;
   RequestTabControl.ActiveTab := RequestContentTab;
   AddActionKinds;
+  URLEdit.Text := cGithubAPISearchRepos;
   NewRequest;
 end;
 
@@ -190,6 +195,13 @@ begin
   // URLEdit.Text := AURL;
   // Clear the request headers
   RequestHeadersVertScrollBox.Content.DeleteChildren;
+  // AddHeaderView;
+  TestAddAuthorization;
+end;
+
+procedure TMainView.TestAddAuthorization;
+begin
+  AddHeaderView('Authorization', 'token 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');
   AddHeaderView;
 end;
 
