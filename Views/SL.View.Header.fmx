@@ -1,0 +1,116 @@
+object HeaderView: THeaderView
+  Align = Top
+  Padding.Left = 4.000000000000000000
+  Padding.Top = 4.000000000000000000
+  Padding.Right = 4.000000000000000000
+  Padding.Bottom = 4.000000000000000000
+  Size.Width = 746.000000000000000000
+  Size.Height = 46.000000000000000000
+  Size.PlatformDefault = False
+  object ActionButton: TSpeedButton
+    Align = Left
+    Position.X = 4.000000000000000000
+    Position.Y = 4.000000000000000000
+    Size.Width = 37.000000000000000000
+    Size.Height = 38.000000000000000000
+    Size.PlatformDefault = False
+    OnClick = ActionButtonClick
+    object ActionImage: TImage
+      MultiResBitmap = <
+        item
+        end>
+      Align = Client
+      HitTest = False
+      Margins.Left = 4.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Size.Width = 29.000000000000000000
+      Size.Height = 30.000000000000000000
+      Size.PlatformDefault = False
+    end
+  end
+  object DeleteButton: TSpeedButton
+    Align = MostRight
+    Margins.Left = 12.000000000000000000
+    Position.X = 705.000000000000000000
+    Position.Y = 4.000000000000000000
+    Size.Width = 37.000000000000000000
+    Size.Height = 38.000000000000000000
+    Size.PlatformDefault = False
+    OnClick = DeleteButtonClick
+    object DeleteImage: TImage
+      MultiResBitmap = <
+        item
+        end>
+      Align = Client
+      HitTest = False
+      Margins.Left = 4.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Right = 4.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Size.Width = 29.000000000000000000
+      Size.Height = 30.000000000000000000
+      Size.PlatformDefault = False
+    end
+  end
+  object EnabledCheckBox: TCheckBox
+    Align = Right
+    CanFocus = False
+    Position.X = 675.000000000000000000
+    Position.Y = 4.000000000000000000
+    Size.Width = 18.000000000000000000
+    Size.Height = 38.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+  end
+  object HeaderKindLayout: TLayout
+    Align = Left
+    Margins.Left = 8.000000000000000000
+    Position.X = 49.000000000000000000
+    Position.Y = 4.000000000000000000
+    Size.Width = 172.000000000000000000
+    Size.Height = 38.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    object HeaderKindComboBox: TComboBox
+      Align = VertCenter
+      Position.Y = 6.000000000000000000
+      Size.Width = 172.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      OnClosePopup = HeaderKindComboBoxClosePopup
+      OnPopup = HeaderKindComboBoxPopup
+    end
+    object NewHeaderLabel: TLabel
+      Align = VertCenter
+      Position.Y = 10.000000000000000000
+      Size.Width = 244.000000000000000000
+      Size.Height = 17.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'New Header'
+      Visible = False
+      TabOrder = 1
+    end
+  end
+  object HeaderValueLayout: TLayout
+    Align = Client
+    Margins.Left = 12.000000000000000000
+    Margins.Right = 12.000000000000000000
+    Size.Width = 430.000000000000000000
+    Size.Height = 38.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 4
+    object HeaderValueEdit: TEdit
+      Touch.InteractiveGestures = [LongTap, DoubleTap]
+      Align = VertCenter
+      TabOrder = 0
+      Position.Y = 6.000000000000000000
+      Size.Width = 430.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      OnChangeTracking = HeaderValueEditChangeTracking
+    end
+  end
+end
