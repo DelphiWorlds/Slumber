@@ -13,8 +13,8 @@ const
   cHTTPMethodPut = 'PUT';
 
   cActionKindNames: array[THTTPMethod] of string = (cHTTPMethodDelete, cHTTPMethodGet, cHTTPMethodPatch, cHTTPMethodPost, cHTTPMethodPut);
-  cHeaderKindNames: array[THeaderKind] of string = ('Content-Type', 'Authorization');
-  // cHeaderKindCaptions: array[THeaderKind] of string = ('Content Type', 'Authorization');
+  cHeaderKindNames: array[THeaderKind] of string = ('Accept', 'Accept-Charset', 'Accept-Encoding', 'Access-Control-Request-Headers',
+    'Access-Control-Request-Method', 'Authorization', 'Cache-Control', 'Content-Type', 'User-Agent');
 
 implementation
 

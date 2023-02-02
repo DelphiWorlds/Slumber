@@ -3,7 +3,8 @@ unit SL.Types;
 interface
 
 type
-  THeaderKind = (ContentType, Authorization);
+  THeaderKind = (Accept, AcceptCharset, AcceptEncoding, AccessControlRequestHeaders, AccessControlRequestMethod, Authorization, CacheControl,
+    ContentType, UserAgent);
 
   TRequestHeader = record
     Index: Integer;
