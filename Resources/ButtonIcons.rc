@@ -1,0 +1,5 @@
+ButtonIcons_cog RCDATA "Resources\ButtonIcons\cog.svg"
+ButtonIcons_menu RCDATA "Resources\ButtonIcons\menu.svg"
+ButtonIcons_x_circle RCDATA "Resources\ButtonIcons\x-circle.svg"
+ButtonIcons_list_plus RCDATA "Resources\ButtonIcons\list-plus.svg"
+
