@@ -4,15 +4,15 @@ object HeaderView: THeaderView
   Padding.Top = 4.000000000000000000
   Padding.Right = 4.000000000000000000
   Padding.Bottom = 4.000000000000000000
-  Size.Width = 746.000000000000000000
-  Size.Height = 46.000000000000000000
+  Size.Width = 744.000000000000000000
+  Size.Height = 48.000000000000000000
   Size.PlatformDefault = False
   object ActionButton: TSpeedButton
     Align = Left
     Position.X = 4.000000000000000000
     Position.Y = 4.000000000000000000
     Size.Width = 37.000000000000000000
-    Size.Height = 38.000000000000000000
+    Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
     OnClick = ActionButtonClick
     object ActionImage: TImage
@@ -26,17 +26,17 @@ object HeaderView: THeaderView
       Margins.Right = 4.000000000000000000
       Margins.Bottom = 4.000000000000000000
       Size.Width = 29.000000000000000000
-      Size.Height = 30.000000000000000000
+      Size.Height = 32.000000000000000000
       Size.PlatformDefault = False
     end
   end
   object DeleteButton: TSpeedButton
     Align = MostRight
     Margins.Left = 12.000000000000000000
-    Position.X = 705.000000000000000000
+    Position.X = 703.000000000000000000
     Position.Y = 4.000000000000000000
     Size.Width = 37.000000000000000000
-    Size.Height = 38.000000000000000000
+    Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
     OnClick = DeleteButtonClick
     object DeleteImage: TImage
@@ -50,17 +50,17 @@ object HeaderView: THeaderView
       Margins.Right = 4.000000000000000000
       Margins.Bottom = 4.000000000000000000
       Size.Width = 29.000000000000000000
-      Size.Height = 30.000000000000000000
+      Size.Height = 32.000000000000000000
       Size.PlatformDefault = False
     end
   end
   object EnabledCheckBox: TCheckBox
     Align = Right
     CanFocus = False
-    Position.X = 675.000000000000000000
+    Position.X = 673.000000000000000000
     Position.Y = 4.000000000000000000
     Size.Width = 18.000000000000000000
-    Size.Height = 38.000000000000000000
+    Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
   end
@@ -70,12 +70,12 @@ object HeaderView: THeaderView
     Position.X = 49.000000000000000000
     Position.Y = 4.000000000000000000
     Size.Width = 200.000000000000000000
-    Size.Height = 38.000000000000000000
+    Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 3
     object HeaderKindComboBox: TComboBox
       Align = VertCenter
-      Position.Y = 6.000000000000000000
+      Position.Y = 7.000000000000000000
       Size.Width = 200.000000000000000000
       Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
@@ -85,6 +85,7 @@ object HeaderView: THeaderView
     end
     object NewHeaderLabel: TLabel
       Align = VertCenter
+      Opacity = 0.699999988079071100
       Position.Y = 10.000000000000000000
       Size.Width = 244.000000000000000000
       Size.Height = 17.000000000000000000
@@ -98,16 +99,16 @@ object HeaderView: THeaderView
     Align = Client
     Margins.Left = 12.000000000000000000
     Margins.Right = 12.000000000000000000
-    Size.Width = 402.000000000000000000
-    Size.Height = 38.000000000000000000
+    Size.Width = 400.000000000000000000
+    Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
     object HeaderValueEdit: TEdit
       Touch.InteractiveGestures = [LongTap, DoubleTap]
       Align = VertCenter
       TabOrder = 0
-      Position.Y = 6.000000000000000000
-      Size.Width = 402.000000000000000000
+      Position.Y = 7.000000000000000000
+      Size.Width = 400.000000000000000000
       Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       OnChangeTracking = HeaderValueEditChangeTracking

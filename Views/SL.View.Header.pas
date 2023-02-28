@@ -36,12 +36,13 @@ type
     procedure FocusHeaderValueEdit;
     function GetHeaderName: string;
     function GetHeaderValue: string;
-    procedure SetHeaderValue(const Value: string);
     function GetIsChecked: Boolean;
     procedure SetIsActive(const Value: Boolean);
     procedure SetHeaderName(const Value: string);
+    procedure SetHeaderValue(const Value: string);
   public
     constructor Create(AOwner: TComponent); override;
+    function GainFocus: Boolean;
     property HeaderName: string read GetHeaderName write SetHeaderName;
     property HeaderValue: string read GetHeaderValue write SetHeaderValue;
     property IsActive: Boolean read FIsActive;
@@ -66,7 +67,7 @@ begin
   Name := '';
   HeaderKindComboBox.Items.AddStrings(cHeaderKindNames);
   HeaderKindComboBox.ItemIndex := 0;
-  Resources.LoadGeneralImage(DeleteImage.Bitmap, cGeneralImageDeleteIndex);
+  Resources.LoadButtonImage(cButtonImageDeleteIndex, DeleteImage.Bitmap);
   SetIsActive(False);
 end;
 
@@ -77,7 +78,9 @@ end;
 
 procedure THeaderView.DeleteButtonClick(Sender: TObject);
 begin
-  TThread.Queue(nil, DoDelete);
+  // ForceQueue is used here to allow the OnClick handler to complete before calling DoDeleted
+  // This is so that the mouse capture is released from the button
+  TThread.ForceQueue(nil, DoDelete);
 end;
 
 procedure THeaderView.DoActive;
@@ -101,7 +104,19 @@ end;
 procedure THeaderView.FocusHeaderValueEdit;
 begin
   HeaderValueEdit.SetFocus;
-  // Maybe deselect and set cursor to beginning
+  HeaderValueEdit.SelLength := 0;
+  HeaderValueEdit.SelStart := 0;
+end;
+
+function THeaderView.GainFocus: Boolean;
+begin
+  if IsActive then
+  begin
+    FocusHeaderValueEdit;
+    Result := True;
+  end
+  else
+    Result := False;
 end;
 
 function THeaderView.GetHeaderName: string;
@@ -120,8 +135,8 @@ procedure THeaderView.HeaderKindComboBoxClosePopup(Sender: TObject);
 begin
   if HeaderKindComboBox.ItemIndex <> FHeaderIndex then
   begin
-    // DoChanged;
-    TThread.Queue(nil, FocusHeaderValueEdit);
+    FocusHeaderValueEdit;
+    DoChanged;
   end;
 end;
 
@@ -132,7 +147,7 @@ end;
 
 procedure THeaderView.HeaderValueEditChangeTracking(Sender: TObject);
 begin
-  // DoChanged;
+  DoChanged;
 end;
 
 procedure THeaderView.SetHeaderName(const Value: string);
@@ -159,7 +174,7 @@ begin
   begin
     SetIsActive(True);
     DoActive;
-    TThread.Queue(nil, FocusHeaderValueEdit);
+    FocusHeaderValueEdit;
   end;
 end;
 
@@ -167,16 +182,15 @@ procedure THeaderView.SetIsActive(const Value: Boolean);
 begin
   FIsActive := Value;
   if FIsActive then
-    Resources.LoadGeneralImage(ActionImage.Bitmap, cGeneralImageGrabIndex)
+    Resources.LoadButtonImage(cButtonImageGrabIndex, ActionImage.Bitmap)
   else
-    Resources.LoadGeneralImage(ActionImage.Bitmap, cGeneralImageCogIndex);
+    Resources.LoadButtonImage(cButtonImageCogIndex, ActionImage.Bitmap);
   HeaderKindComboBox.Visible := FIsActive;
   HeaderValueEdit.Visible := FIsActive;
   EnabledCheckBox.Visible := FIsActive;
   EnabledCheckBox.IsChecked := FIsActive;
   DeleteButton.Visible := FIsActive;
   NewHeaderLabel.Visible := not FIsActive;
-  // Change ActionButton glyph depending on FIsActive
 end;
 
 end.
