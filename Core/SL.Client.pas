@@ -4,14 +4,11 @@ interface
 
 uses
   System.JSON,
-  System.Net.URLClient, System.Net.HttpClient;
+  System.Net.URLClient, System.Net.HttpClient,
+  SL.Types;
 
 type
-  THTTPMethod = (Delete, Get, Patch, Post, Put);
-  // TNetHeaders = System.Net.URLClient.TNetHeaders;
   IHTTPResponse = System.Net.HttpClient.IHTTPResponse;
-
-  // THTTPResponseProc = reference to procedure(const AResponse: IHTTPResponse);
 
   THTTPClientEx = class(TObject)
   private
@@ -25,8 +22,6 @@ type
     procedure ClearHeaders;
     function Send(const AMethod: THTTPMethod; const APath: string; const ARequest: string = ''): IHTTPResponse; overload;
     function Send(const AURL: string; const AMethod: THTTPMethod; const ARequest: string = ''): IHTTPResponse; overload;
-    // procedure SendAsync(const AMethod: THTTPMethod; const APath: string; const AHandler: THTTPResponseProc; const ARequest: string = ''); overload;
-    // procedure SendAsync(const AURL: string; const AMethod: THTTPMethod; const AHandler: THTTPResponseProc; const ARequest: string = ''); overload;
     property Headers[const AName: string]: string read GetHeader write SetHeader;
     property Host: string read FHost write FHost;
     property Port: Integer read FPort write FPort;
@@ -70,7 +65,6 @@ var
   LHTTP: THTTPClient;
   LRequest: TStream;
 begin
-  // TOSLog.d('Execute: %s', [LURL]);
   LHTTP := THTTPClient.Create;
   try
     LHTTP.ConnectionTimeout := 5000;
@@ -94,8 +88,6 @@ begin
   finally
     LHTTP.Free;
   end;
-  // TOSLog.d('Response:');
-  // TOSLog.d(TJSONHelper.Tidy(LResponse.ContentAsString));
 end;
 
 procedure THTTPClientEx.SetHeader(const AName, AValue: string);
