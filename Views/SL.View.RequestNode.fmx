@@ -1,0 +1,35 @@
+object RequestNodeView: TRequestNodeView
+  Align = Client
+  Padding.Left = 4.000000000000000000
+  Padding.Top = 4.000000000000000000
+  Padding.Right = 4.000000000000000000
+  Padding.Bottom = 4.000000000000000000
+  Size.Width = 342.000000000000000000
+  Size.Height = 34.000000000000000000
+  Size.PlatformDefault = False
+  object MethodLabel: TLabel
+    Align = Left
+    StyledSettings = [Family]
+    Position.X = 4.000000000000000000
+    Position.Y = 4.000000000000000000
+    Size.Width = 57.000000000000000000
+    Size.Height = 26.000000000000000000
+    Size.PlatformDefault = False
+    TextSettings.Font.Size = 16.000000000000000000
+    TextSettings.FontColor = claMediumorchid
+    Text = 'GET'
+    TabOrder = 1
+  end
+  object DescriptionLabel: TLabel
+    Align = Client
+    StyledSettings = [Family, Style, FontColor]
+    Margins.Left = 10.000000000000000000
+    Size.Width = 267.000000000000000000
+    Size.Height = 26.000000000000000000
+    Size.PlatformDefault = False
+    TextSettings.Font.Size = 16.000000000000000000
+    TextSettings.WordWrap = False
+    Text = 'Get Public APIs'
+    TabOrder = 0
+  end
+end
