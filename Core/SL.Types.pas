@@ -3,6 +3,8 @@ unit SL.Types;
 interface
 
 type
+  THTTPMethod = (Delete, Get, Patch, Post, Put);
+
   THeaderKind = (Accept, AcceptCharset, AcceptEncoding, AccessControlRequestHeaders, AccessControlRequestMethod, Authorization, CacheControl,
     ContentType, UserAgent);
 
