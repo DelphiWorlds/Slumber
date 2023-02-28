@@ -2,31 +2,34 @@ object MainView: TMainView
   Left = 0
   Top = 0
   Caption = 'Slumber'
-  ClientHeight = 1146
-  ClientWidth = 1601
+  ClientHeight = 848
+  ClientWidth = 1462
   Position = ScreenCenter
+  StyleBook = Resources.StyleBook
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
+  OnFocusChanged = FormFocusChanged
   DesignerMasterStyle = 0
   object MainLayout: TLayout
     Align = Client
-    Size.Width = 1601.000000000000000000
-    Size.Height = 1146.000000000000000000
+    Size.Width = 1462.000000000000000000
+    Size.Height = 848.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 0
     object NavigatorLayout: TLayout
       Align = Left
-      Size.Width = 277.000000000000000000
-      Size.Height = 1146.000000000000000000
+      Size.Width = 350.000000000000000000
+      Size.Height = 848.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
       object NavigatorTopLayout: TLayout
         Align = Top
-        Size.Width = 277.000000000000000000
+        Size.Width = 350.000000000000000000
         Size.Height = 42.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 0
+        Visible = False
+        TabOrder = 1
         object SlumberLabel: TLabel
           Align = Left
           StyledSettings = [Family, FontColor]
@@ -42,49 +45,102 @@ object MainView: TMainView
           TabOrder = 0
         end
       end
-      object RequestsTreeView: TTreeView
+      object FoldersTreeView: TTreeView
         Align = Client
         Margins.Left = 8.000000000000000000
         Margins.Bottom = 8.000000000000000000
-        Size.Width = 269.000000000000000000
-        Size.Height = 1096.000000000000000000
+        Size.Width = 342.000000000000000000
+        Size.Height = 800.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 1
-        Viewport.Width = 265.000000000000000000
-        Viewport.Height = 1092.000000000000000000
+        TabOrder = 2
+        Viewport.Width = 338.000000000000000000
+        Viewport.Height = 796.000000000000000000
+      end
+      object ItemLayout: TLayout
+        Align = Top
+        Size.Width = 350.000000000000000000
+        Size.Height = 40.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        object ItemEditLayout: TLayout
+          Align = Client
+          Margins.Left = 8.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Size.Width = 291.000000000000000000
+          Size.Height = 40.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 3
+          object ItemEdit: TEdit
+            Touch.InteractiveGestures = [LongTap, DoubleTap]
+            Align = VertCenter
+            TabOrder = 0
+            Position.Y = 7.000000000000000000
+            Size.Width = 291.000000000000000000
+            Size.Height = 26.000000000000000000
+            Size.PlatformDefault = False
+          end
+        end
+        object AddItemButton: TSpeedButton
+          Align = Right
+          CanFocus = True
+          Margins.Left = 4.000000000000000000
+          Margins.Top = 2.000000000000000000
+          Margins.Right = 6.000000000000000000
+          Margins.Bottom = 2.000000000000000000
+          Position.X = 307.000000000000000000
+          Position.Y = 2.000000000000000000
+          Size.Width = 37.000000000000000000
+          Size.Height = 36.000000000000000000
+          Size.PlatformDefault = False
+          OnClick = AddItemButtonClick
+          object AddItemImage: TImage
+            MultiResBitmap = <
+              item
+              end>
+            Align = Client
+            HitTest = False
+            Margins.Left = 4.000000000000000000
+            Margins.Top = 2.000000000000000000
+            Margins.Right = 4.000000000000000000
+            Margins.Bottom = 2.000000000000000000
+            Size.Width = 29.000000000000000000
+            Size.Height = 32.000000000000000000
+            Size.PlatformDefault = False
+          end
+        end
       end
     end
     object RequestResponseLayout: TLayout
       Align = Client
-      Size.Width = 1320.000000000000000000
-      Size.Height = 1146.000000000000000000
+      Size.Width = 1108.000000000000000000
+      Size.Height = 848.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
       object RequestLayout: TLayout
         Align = Left
         Position.Y = 42.000000000000000000
-        Size.Width = 750.000000000000000000
-        Size.Height = 1104.000000000000000000
+        Size.Width = 600.000000000000000000
+        Size.Height = 806.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 2
         object RequestTabControl: TTabControl
           Align = Client
-          Size.Width = 750.000000000000000000
-          Size.Height = 1104.000000000000000000
+          Size.Width = 600.000000000000000000
+          Size.Height = 806.000000000000000000
           Size.PlatformDefault = False
-          TabIndex = 1
+          TabIndex = 0
           TabOrder = 1
           TabPosition = PlatformDefault
           Sizes = (
-            750s
-            1078s
-            750s
-            1078s)
+            600s
+            780s
+            600s
+            780s)
           object RequestContentTab: TTabItem
             CustomIcon = <
               item
               end>
-            IsSelected = False
+            IsSelected = True
             Size.Width = 63.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
@@ -103,19 +159,19 @@ object MainView: TMainView
               Margins.Top = 8.000000000000000000
               Margins.Right = 8.000000000000000000
               Margins.Bottom = 8.000000000000000000
-              Size.Width = 734.000000000000000000
-              Size.Height = 1062.000000000000000000
+              Size.Width = 584.000000000000000000
+              Size.Height = 764.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 0
-              Viewport.Width = 730.000000000000000000
-              Viewport.Height = 1058.000000000000000000
+              Viewport.Width = 580.000000000000000000
+              Viewport.Height = 760.000000000000000000
             end
           end
           object RequestHeadersTab: TTabItem
             CustomIcon = <
               item
               end>
-            IsSelected = True
+            IsSelected = False
             Size.Width = 64.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
@@ -130,33 +186,33 @@ object MainView: TMainView
               Margins.Top = 8.000000000000000000
               Margins.Right = 8.000000000000000000
               Margins.Bottom = 8.000000000000000000
-              Size.Width = 734.000000000000000000
-              Size.Height = 1062.000000000000000000
+              Size.Width = 584.000000000000000000
+              Size.Height = 764.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 0
-              Viewport.Width = 734.000000000000000000
-              Viewport.Height = 1062.000000000000000000
+              Viewport.Width = 584.000000000000000000
+              Viewport.Height = 764.000000000000000000
             end
           end
         end
       end
       object ResponseLayout: TLayout
         Align = Client
-        Size.Width = 566.000000000000000000
-        Size.Height = 1104.000000000000000000
+        Size.Width = 504.000000000000000000
+        Size.Height = 806.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 1
         object ResponseTabControl: TTabControl
           Align = Client
-          Size.Width = 566.000000000000000000
-          Size.Height = 1104.000000000000000000
+          Size.Width = 504.000000000000000000
+          Size.Height = 806.000000000000000000
           Size.PlatformDefault = False
           TabIndex = 0
           TabOrder = 1
           TabPosition = PlatformDefault
           Sizes = (
-            566s
-            1078s)
+            504s
+            780s)
           object ResponseContentTab: TTabItem
             CustomIcon = <
               item
@@ -180,12 +236,12 @@ object MainView: TMainView
               Margins.Top = 4.000000000000000000
               Margins.Right = 8.000000000000000000
               Margins.Bottom = 8.000000000000000000
-              Size.Width = 550.000000000000000000
-              Size.Height = 1029.000000000000000000
+              Size.Width = 488.000000000000000000
+              Size.Height = 731.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 0
-              Viewport.Width = 546.000000000000000000
-              Viewport.Height = 1025.000000000000000000
+              Viewport.Width = 484.000000000000000000
+              Viewport.Height = 727.000000000000000000
             end
             object ResponseStatusLayout: TLayout
               Align = Top
@@ -193,7 +249,7 @@ object MainView: TMainView
               Padding.Right = 8.000000000000000000
               Margins.Top = 8.000000000000000000
               Position.Y = 8.000000000000000000
-              Size.Width = 566.000000000000000000
+              Size.Width = 504.000000000000000000
               Size.Height = 29.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 1
@@ -206,16 +262,16 @@ object MainView: TMainView
                 Size.PlatformDefault = False
                 TextSettings.Font.Size = 16.000000000000000000
                 TextSettings.Font.StyleExt = {00070000000000000004000000}
-                TextSettings.FontColor = claGreen
+                TextSettings.FontColor = claLimegreen
                 TextSettings.HorzAlign = Trailing
                 Text = '200'
                 TabOrder = 1
               end
               object ResponseStatusTextLabel: TLabel
                 Align = Client
-                StyledSettings = [Family]
+                StyledSettings = [Family, FontColor]
                 Margins.Left = 12.000000000000000000
-                Size.Width = 501.000000000000000000
+                Size.Width = 439.000000000000000000
                 Size.Height = 29.000000000000000000
                 Size.PlatformDefault = False
                 TextSettings.Font.Size = 16.000000000000000000
@@ -231,15 +287,15 @@ object MainView: TMainView
         Align = Left
         Cursor = crHSplit
         MinSize = 20.000000000000000000
-        Position.X = 750.000000000000000000
+        Position.X = 600.000000000000000000
         Position.Y = 42.000000000000000000
         Size.Width = 4.000000000000000000
-        Size.Height = 1104.000000000000000000
+        Size.Height = 806.000000000000000000
         Size.PlatformDefault = False
       end
       object RequestActionLayout: TLayout
         Align = Top
-        Size.Width = 1320.000000000000000000
+        Size.Width = 1108.000000000000000000
         Size.Height = 42.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
@@ -264,7 +320,7 @@ object MainView: TMainView
           Align = Client
           Margins.Left = 12.000000000000000000
           Margins.Right = 4.000000000000000000
-          Size.Width = 1067.000000000000000000
+          Size.Width = 855.000000000000000000
           Size.Height = 42.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 4
@@ -272,9 +328,9 @@ object MainView: TMainView
             Touch.InteractiveGestures = [LongTap, DoubleTap]
             Align = VertCenter
             TabOrder = 0
-            Position.Y = 9.000000000000000000
-            Size.Width = 1067.000000000000000000
-            Size.Height = 24.000000000000000000
+            Position.Y = 8.000000000000000000
+            Size.Width = 855.000000000000000000
+            Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
           end
         end
@@ -287,7 +343,7 @@ object MainView: TMainView
           Margins.Top = 6.000000000000000000
           Margins.Right = 6.000000000000000000
           Margins.Bottom = 6.000000000000000000
-          Position.X = 1226.000000000000000000
+          Position.X = 1014.000000000000000000
           Position.Y = 6.000000000000000000
           Size.Width = 88.000000000000000000
           Size.Height = 30.000000000000000000
@@ -300,19 +356,53 @@ object MainView: TMainView
       Align = Left
       Cursor = crHSplit
       MinSize = 20.000000000000000000
-      Position.X = 277.000000000000000000
+      Position.X = 350.000000000000000000
       Size.Width = 4.000000000000000000
-      Size.Height = 1146.000000000000000000
+      Size.Height = 848.000000000000000000
       Size.PlatformDefault = False
     end
   end
+  object AddItemPopupMenu: TPopupMenu
+    Left = 164
+    Top = 302
+    object FoldersAddFolderMenuItem: TMenuItem
+      Action = AddFolderAction
+      Enabled = True
+      ImageIndex = -1
+    end
+    object FoldersAddRequestMenuItem: TMenuItem
+      Action = AddRequestAction
+      Enabled = True
+      ImageIndex = -1
+    end
+    object FoldersDeleteMenuItem: TMenuItem
+      Action = DeleteFolderAction
+      Enabled = True
+      ImageIndex = -1
+    end
+  end
   object ActionList: TActionList
-    Left = 1041
-    Top = 136
+    OnExecute = ActionListExecute
+    Left = 165
+    Top = 216
     object SendAction: TAction
       Text = 'Send'
       OnExecute = SendActionExecute
       OnUpdate = SendActionUpdate
+    end
+    object AddFolderAction: TAction
+      Text = 'Folder'
+      OnExecute = AddFolderActionExecute
+      OnUpdate = AddFolderActionUpdate
+    end
+    object AddRequestAction: TAction
+      Text = 'Request'
+      OnExecute = AddRequestActionExecute
+    end
+    object DeleteFolderAction: TAction
+      Text = 'Delete'
+      OnExecute = DeleteFolderActionExecute
+      OnUpdate = DeleteFolderActionUpdate
     end
   end
 end
