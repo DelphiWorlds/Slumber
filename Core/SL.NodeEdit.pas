@@ -4,7 +4,7 @@ interface
 
 uses
   System.UITypes, System.Classes,
-  FMX.Objects, FMX.Edit, FMX.Controls, FMX.Types;
+  FMX.Objects, FMX.Graphics, FMX.Edit, FMX.Controls, FMX.Types;
 
 type
   /// <summary>
@@ -13,9 +13,9 @@ type
   /// </summary>
   TEdit = class(FMX.Edit.TEdit)
   private
-    FColor: TAlphaColor;
     FRectangle: TRectangle;
-    procedure SetColor(const Value: TAlphaColor);
+    function GetFill: TBrush;
+    function GetStroke: TStrokeBrush;
   protected
     procedure AdjustFixedSize(const Ref: TControl); override;
     procedure ApplyStyle; override;
@@ -23,13 +23,14 @@ type
     function GetStyleObject: TFmxObject; override;
   public
     constructor Create(AOwner: TComponent); override;
-    property Color: TAlphaColor read FColor write SetColor;
+    property Fill: TBrush read GetFill;
+    property Stroke: TStrokeBrush read GetStroke;
   end;
 
 implementation
 
 uses
-  FMX.Graphics, FMX.Styles.Objects;
+  FMX.Styles.Objects;
 
 { TEdit }
 
@@ -40,9 +41,7 @@ begin
   FRectangle.StyleName := 'rect';
   FRectangle.Align := TAlignLayout.Contents;
   FRectangle.HitTest := False;
-  FRectangle.Stroke.Kind := TBrushKind.None;
   FRectangle.Fill.Color := TAlphaColors.Null;
-  FRectangle.Sides := [];
   FRectangle.XRadius := 4;
   FRectangle.YRadius := 4;
 end;
@@ -68,16 +67,21 @@ begin
   inherited;
 end;
 
+function TEdit.GetFill: TBrush;
+begin
+  Result := FRectangle.Fill;
+end;
+
+function TEdit.GetStroke: TStrokeBrush;
+begin
+  Result := FRectangle.Stroke;
+end;
+
 function TEdit.GetStyleObject: TFmxObject;
 begin
   Result := inherited GetStyleObject;
   if Result <> nil then
     Result.InsertObject(0, FRectangle);
-end;
-
-procedure TEdit.SetColor(const Value: TAlphaColor);
-begin
-  FRectangle.Fill.Color := Value;
 end;
 
 end.
