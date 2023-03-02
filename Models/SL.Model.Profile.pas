@@ -40,6 +40,7 @@ type
     FRequests: TSlumberRequests;
   protected
     function FindRequest( const AID: string; out ARequest: TSlumberRequest): Boolean;
+    procedure SetParentID(const AParentID: string);
   public
     constructor Create(const AID: string = '');
     destructor Destroy; override;
@@ -62,6 +63,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+    function AddFolder(const AParent: TSlumberFolder): TSlumberFolder;
     function FindFolder(const AID: string; out AFolder: TSlumberFolder): Boolean;
     function FindRequest(const AID: string; out ARequest: TSlumberRequest): Boolean;
     property Folders: TSlumberFolders read FFolders;
@@ -125,6 +127,11 @@ begin
   Result := FID.Equals(cRootFolderID);
 end;
 
+procedure TSlumberFolder.SetParentID(const AParentID: string);
+begin
+  FParentID := AParentID;
+end;
+
 function TSlumberFolder.AddRequest: TSlumberRequest;
 begin
   Result := TSlumberRequest.Create(Self);
@@ -149,6 +156,14 @@ end;
 class function TSlumberProfile.GetNewID: string;
 begin
   Result := TGUID.NewGuid.ToString.Replace('{', '').Replace('}', '');
+end;
+
+function TSlumberProfile.AddFolder(const AParent: TSlumberFolder): TSlumberFolder;
+begin
+  Result := TSlumberFolder.Create;
+  FFolders.Add(Result);
+  if AParent <> nil then
+    Result.SetParentID(AParent.ID);
 end;
 
 function TSlumberProfile.GetRootFolder: TSlumberFolder;
