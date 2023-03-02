@@ -80,6 +80,7 @@ type
     procedure FocusHeaderView;
     procedure FolderNodeDescriptionChangeHandler(Sender: TObject);
     procedure HandleResponse(const AResponse: IHTTPResponse);
+    function HasClickedNode: Boolean;
     function HasInactiveHeaderView: Boolean;
     procedure HeaderViewActiveHandler(Sender: TObject);
     procedure HeaderViewDeleteHandler(Sender: TObject);
@@ -122,6 +123,11 @@ type
     function FolderNodeInfo: TFolderNodeInfo;
     function GetFolderNodeView: TFolderNodeView;
     function GetRequestNodeView: TRequestNodeView;
+  end;
+
+  TActionListHelper = class helper for TActionList
+  public
+    procedure UpdateActions;
   end;
 
 { TTreeViewItemHelper }
@@ -168,6 +174,16 @@ begin
   end;
 end;
 
+{ TActionListHelper }
+
+procedure TActionListHelper.UpdateActions;
+var
+  I: Integer;
+begin
+  for I := 0 to ActionCount - 1 do
+    Actions[I].Update;
+end;
+
 { TMainView }
 
 constructor TMainView.Create(AOwner: TComponent);
@@ -209,30 +225,38 @@ procedure TMainView.AddFolderActionExecute(Sender: TObject);
 var
   LFolder, LParentFolder: TSlumberFolder;
   LInfo: TFolderNodeInfo;
+  LParentNode: TTreeViewItem;
 begin
+  LParentNode := nil;
   LParentFolder := nil;
-  if IsNodeSelected then
+  if HasClickedNode then
   begin
-    if not FProfile.FindFolder(FoldersTreeView.Selected.FolderNodeInfo.ID, LParentFolder) then
+    LParentNode := FClickedNode;
+    if not FProfile.FindFolder(FClickedNode.FolderNodeInfo.ID, LParentFolder) then
       // else something is horribly wrong..
   end;
   LFolder := FProfile.AddFolder(LParentFolder);
   LFolder.Name := 'New folder';
-  FoldersTreeView.Selected := AddFolderNode(FoldersTreeView.Selected, LFolder, True);
+  FoldersTreeView.Selected := AddFolderNode(LParentNode, LFolder, True);
 end;
 
 procedure TMainView.AddFolderActionUpdate(Sender: TObject);
 begin
-  AddFolderAction.Enabled := (FClickedNode = nil) or (FClickedNode.FolderNodeInfo.Kind = TFolderNodeKind.Folder);
+  AddFolderAction.Enabled := not HasClickedNode or (FClickedNode.FolderNodeInfo.Kind = TFolderNodeKind.Folder);
 end;
 
 procedure TMainView.AddRequestActionExecute(Sender: TObject);
 var
   LFolder: TSlumberFolder;
   LRequest: TSlumberRequest;
+  LParentNode: TTreeViewItem;
 begin
-  if IsNodeSelected then
-    LFolder := GetFolderFromNode(FoldersTreeView.Selected)
+  LParentNode := nil;
+  if HasClickedNode then
+  begin
+    LFolder := GetFolderFromNode(FClickedNode);
+    LParentNode := FClickedNode;
+  end
   else
     LFolder := FProfile.RootFolder;
   // In theory, this should never be nil
@@ -242,22 +266,20 @@ begin
     LRequest.HTTPMethod := 'GET';
     LRequest.Name := 'New request';
     // Now clear the edits etc blah blah
-    FoldersTreeView.Selected := AddRequestNode(FoldersTreeView.Selected, LRequest, True);
+    FoldersTreeView.Selected := AddRequestNode(LParentNode, LRequest, True);
   end;
 end;
 
 procedure TMainView.AddRequestActionUpdate(Sender: TObject);
 begin
-  if FClickedNode <> nil then
-    Sleep(0);
-  AddRequestAction.Enabled := (FClickedNode = nil) or (FClickedNode.FolderNodeInfo.Kind = TFolderNodeKind.Folder);
+  AddRequestAction.Enabled := not HasClickedNode or (FClickedNode.FolderNodeInfo.Kind = TFolderNodeKind.Folder);
 end;
 
 procedure TMainView.DeleteItemActionExecute(Sender: TObject);
 var
   LInfo: TFolderNodeInfo;
 begin
-  if FClickedNode <> nil then
+  if HasClickedNode then
   begin
     LInfo := FClickedNode.FolderNodeInfo;
     case LInfo.Kind of
@@ -292,7 +314,7 @@ var
   LFolderNodeView: TFolderNodeView;
   LRequestNodeView: TRequestNodeView;
 begin
-  if FClickedNode <> nil then
+  if HasClickedNode then
   begin
     LInfo := FClickedNode.FolderNodeInfo;
     case LInfo.Kind of
@@ -319,7 +341,7 @@ var
   LInfo: TFolderNodeInfo;
 begin
   LInfo := Default(TFolderNodeInfo);
-  if (FClickedNode <> nil) then
+  if HasClickedNode then
     LInfo := FClickedNode.FolderNodeInfo;
   EditItemAction.Text := cEditCaptions[LInfo.Kind];
   EditItemAction.Enabled := LInfo.Kind in [TFolderNodeKind.Folder, TFolderNodeKind.Request];
@@ -466,12 +488,14 @@ end;
 
 function TMainView.AddRequestNode(const AParent: TFmxObject; const ARequest: TSlumberRequest; const AFocusView: Boolean = False): TTreeViewItem;
 var
-  LNode: TTreeViewItem;
   LView: TRequestNodeView;
 begin
   Result := TTreeViewItem.Create(Self);
   Result.TagString := Format(cNodeDataFormat, ['2', ARequest.ID]);
-  AParent.AddObject(Result);
+  if AParent = nil then
+    FoldersTreeView.AddObject(Result)
+  else
+    AParent.AddObject(Result);
   LView := TRequestNodeView.Create(Self);
   LView.ID := ARequest.ID;
   LView.HTTPMethod := ARequest.HTTPMethod;
@@ -549,7 +573,7 @@ begin
   begin
     LPoint := FoldersTreeView.AbsoluteToLocal(ScreenToClient(LMouseService.GetMousePos));
     FClickedNode := FoldersTreeView.ItemByPoint(LPoint.X, LPoint.Y);
-    //
+    ActionList.UpdateActions;
   end;
 end;
 
@@ -599,6 +623,11 @@ begin
       end;
     end;
   end;
+end;
+
+function TMainView.HasClickedNode: Boolean;
+begin
+  Result := FClickedNode <> nil;
 end;
 
 function TMainView.HasInactiveHeaderView: Boolean;
