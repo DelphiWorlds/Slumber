@@ -30,5 +30,7 @@ object RequestNodeView: TRequestNodeView
     Size.Width = 272.000000000000000000
     Size.Height = 26.000000000000000000
     Size.PlatformDefault = False
+    OnKeyDown = DescriptionEditKeyDown
+    OnExit = DescriptionEditExit
   end
 end

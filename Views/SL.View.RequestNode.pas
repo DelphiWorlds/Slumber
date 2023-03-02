@@ -11,6 +11,8 @@ type
   TRequestNodeView = class(TFrame)
     MethodLabel: TLabel;
     DescriptionEdit: TEdit;
+    procedure DescriptionEditKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
+    procedure DescriptionEditExit(Sender: TObject);
   private
     FID: string;
     FOnDescriptionChange: TNotifyEvent;
@@ -20,7 +22,7 @@ type
     procedure SetHTTPMethod(const Value: string);
   public
     constructor Create(AOwner: TComponent); override;
-    procedure GainFocus;
+    procedure EnableEditing(const AEnable: Boolean);
     property ID: string read FID write FID;
     property Description: string read GetDescription write SetDescription;
     property HTTPMethod: string read GetHTTPMethod write SetHTTPMethod;
@@ -39,11 +41,33 @@ begin
   Name := '';
   SetDescription('');
   SetHTTPMethod('');
+  EnableEditing(False);
 end;
 
-procedure TRequestNodeView.GainFocus;
+procedure TRequestNodeView.DescriptionEditExit(Sender: TObject);
 begin
-  DescriptionEdit.SetFocus;
+  EnableEditing(False);
+end;
+
+procedure TRequestNodeView.DescriptionEditKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
+begin
+  if Key = vkReturn then
+  begin
+    Key := 0;
+    EnableEditing(False);
+  end;
+end;
+
+procedure TRequestNodeView.EnableEditing(const AEnable: Boolean);
+const
+  cEditingOpacity: array[Boolean] of Single = (0.8, 1);
+begin
+  DescriptionEdit.HitTest := AEnable;
+  if AEnable then
+    DescriptionEdit.SetFocus
+  else
+    DescriptionEdit.ResetFocus;
+  DescriptionEdit.Opacity := cEditingOpacity[AEnable];
 end;
 
 function TRequestNodeView.GetDescription: string;
