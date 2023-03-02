@@ -48,19 +48,23 @@ object MainView: TMainView
       object FoldersTreeView: TTreeView
         Align = Client
         Margins.Left = 8.000000000000000000
+        Margins.Top = 8.000000000000000000
         Margins.Bottom = 8.000000000000000000
+        PopupMenu = AddItemPopupMenu
         Size.Width = 342.000000000000000000
-        Size.Height = 800.000000000000000000
+        Size.Height = 832.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 2
+        ItemHeight = 36.000000000000000000
         Viewport.Width = 338.000000000000000000
-        Viewport.Height = 796.000000000000000000
+        Viewport.Height = 828.000000000000000000
       end
       object ItemLayout: TLayout
         Align = Top
         Size.Width = 350.000000000000000000
         Size.Height = 40.000000000000000000
         Size.PlatformDefault = False
+        Visible = False
         TabOrder = 0
         object ItemEditLayout: TLayout
           Align = Client
@@ -69,25 +73,28 @@ object MainView: TMainView
           Size.Width = 291.000000000000000000
           Size.Height = 40.000000000000000000
           Size.PlatformDefault = False
+          Visible = False
           TabOrder = 3
           object ItemEdit: TEdit
             Touch.InteractiveGestures = [LongTap, DoubleTap]
             Align = VertCenter
+            StyleLookup = 'ItemEditStyle1'
             TabOrder = 0
             Position.Y = 7.000000000000000000
             Size.Width = 291.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
+            OnChangeTracking = ItemEditChangeTracking
           end
         end
         object AddItemButton: TSpeedButton
-          Align = Right
+          Align = Left
           CanFocus = True
           Margins.Left = 4.000000000000000000
           Margins.Top = 2.000000000000000000
           Margins.Right = 6.000000000000000000
           Margins.Bottom = 2.000000000000000000
-          Position.X = 307.000000000000000000
+          Position.X = 4.000000000000000000
           Position.Y = 2.000000000000000000
           Size.Width = 37.000000000000000000
           Size.Height = 36.000000000000000000
@@ -163,8 +170,8 @@ object MainView: TMainView
               Size.Height = 764.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 0
-              Viewport.Width = 580.000000000000000000
-              Viewport.Height = 760.000000000000000000
+              Viewport.Width = 584.000000000000000000
+              Viewport.Height = 764.000000000000000000
             end
           end
           object RequestHeadersTab: TTabItem
@@ -240,8 +247,8 @@ object MainView: TMainView
               Size.Height = 731.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 0
-              Viewport.Width = 484.000000000000000000
-              Viewport.Height = 727.000000000000000000
+              Viewport.Width = 488.000000000000000000
+              Viewport.Height = 731.000000000000000000
             end
             object ResponseStatusLayout: TLayout
               Align = Top
@@ -363,6 +370,7 @@ object MainView: TMainView
     end
   end
   object AddItemPopupMenu: TPopupMenu
+    OnPopup = AddItemPopupMenuPopup
     Left = 164
     Top = 302
     object FoldersAddFolderMenuItem: TMenuItem
@@ -376,7 +384,7 @@ object MainView: TMainView
       ImageIndex = -1
     end
     object FoldersDeleteMenuItem: TMenuItem
-      Action = DeleteFolderAction
+      Action = DeleteItemAction
       Enabled = True
       ImageIndex = -1
     end
@@ -391,18 +399,19 @@ object MainView: TMainView
       OnUpdate = SendActionUpdate
     end
     object AddFolderAction: TAction
-      Text = 'Folder'
+      Text = 'New Folder'
       OnExecute = AddFolderActionExecute
       OnUpdate = AddFolderActionUpdate
     end
     object AddRequestAction: TAction
-      Text = 'Request'
+      Text = 'New Request'
       OnExecute = AddRequestActionExecute
+      OnUpdate = AddRequestActionUpdate
     end
-    object DeleteFolderAction: TAction
+    object DeleteItemAction: TAction
       Text = 'Delete'
-      OnExecute = DeleteFolderActionExecute
-      OnUpdate = DeleteFolderActionUpdate
+      OnExecute = DeleteItemActionExecute
+      OnUpdate = DeleteItemActionUpdate
     end
   end
 end
