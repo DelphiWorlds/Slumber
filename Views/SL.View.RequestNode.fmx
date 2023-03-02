@@ -1,5 +1,6 @@
 object RequestNodeView: TRequestNodeView
   Align = Client
+  HitTest = False
   Padding.Left = 4.000000000000000000
   Padding.Top = 4.000000000000000000
   Padding.Right = 4.000000000000000000
@@ -9,27 +10,25 @@ object RequestNodeView: TRequestNodeView
   Size.PlatformDefault = False
   object MethodLabel: TLabel
     Align = Left
-    StyledSettings = [Family]
+    StyledSettings = [Family, Size, Style, Other]
     Position.X = 4.000000000000000000
     Position.Y = 4.000000000000000000
-    Size.Width = 57.000000000000000000
+    Size.Width = 52.000000000000000000
     Size.Height = 26.000000000000000000
     Size.PlatformDefault = False
-    TextSettings.Font.Size = 16.000000000000000000
     TextSettings.FontColor = claMediumorchid
     Text = 'GET'
     TabOrder = 1
   end
-  object DescriptionLabel: TLabel
+  object DescriptionEdit: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
     Align = Client
-    StyledSettings = [Family, Style, FontColor]
+    TabOrder = 0
+    Cursor = crDefault
+    Text = 'Repos'
     Margins.Left = 10.000000000000000000
-    Size.Width = 267.000000000000000000
+    Size.Width = 272.000000000000000000
     Size.Height = 26.000000000000000000
     Size.PlatformDefault = False
-    TextSettings.Font.Size = 16.000000000000000000
-    TextSettings.WordWrap = False
-    Text = 'Get Public APIs'
-    TabOrder = 0
   end
 end
