@@ -1,0 +1,21 @@
+object FolderNodeView: TFolderNodeView
+  Align = Client
+  HitTest = False
+  Padding.Left = 4.000000000000000000
+  Padding.Top = 4.000000000000000000
+  Padding.Right = 4.000000000000000000
+  Padding.Bottom = 4.000000000000000000
+  Size.Width = 342.000000000000000000
+  Size.Height = 35.000000000000000000
+  Size.PlatformDefault = False
+  object DescriptionEdit: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    Align = Client
+    TabOrder = 0
+    Cursor = crDefault
+    Text = 'Github APIs'
+    Size.Width = 334.000000000000000000
+    Size.Height = 27.000000000000000000
+    Size.PlatformDefault = False
+  end
+end
