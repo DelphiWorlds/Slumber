@@ -51,6 +51,8 @@ type
     ItemEdit: TEdit;
     AddItemButton: TSpeedButton;
     AddItemImage: TImage;
+    EditItemAction: TAction;
+    FoldersEditMenuItem: TMenuItem;
     procedure SendActionExecute(Sender: TObject);
     procedure SendActionUpdate(Sender: TObject);
     procedure DeleteItemActionUpdate(Sender: TObject);
@@ -64,6 +66,8 @@ type
     procedure ItemEditChangeTracking(Sender: TObject);
     procedure AddItemPopupMenuPopup(Sender: TObject);
     procedure AddRequestActionUpdate(Sender: TObject);
+    procedure EditItemActionUpdate(Sender: TObject);
+    procedure EditItemActionExecute(Sender: TObject);
   private
     FProfile: TSlumberProfile;
     FClickedNode: TTreeViewItem;
@@ -116,6 +120,8 @@ type
   TTreeViewItemHelper = class helper for TTreeViewItem
   public
     function FolderNodeInfo: TFolderNodeInfo;
+    function GetFolderNodeView: TFolderNodeView;
+    function GetRequestNodeView: TRequestNodeView;
   end;
 
 { TTreeViewItemHelper }
@@ -129,6 +135,36 @@ begin
   begin
     Result.Kind := TFolderNodeKind(StrToIntDef(LParts[0], 0));
     Result.ID := LParts[1];
+  end;
+end;
+
+function TTreeViewItemHelper.GetFolderNodeView: TFolderNodeView;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to ChildrenCount - 1 do
+  begin
+    if Children[I] is TFolderNodeView then
+    begin
+      Result := TFolderNodeView(Children[I]);
+      Break;
+    end;
+  end;
+end;
+
+function TTreeViewItemHelper.GetRequestNodeView: TRequestNodeView;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to ChildrenCount - 1 do
+  begin
+    if Children[I] is TRequestNodeView then
+    begin
+      Result := TRequestNodeView(Children[I]);
+      Break;
+    end;
   end;
 end;
 
@@ -221,9 +257,9 @@ procedure TMainView.DeleteItemActionExecute(Sender: TObject);
 var
   LInfo: TFolderNodeInfo;
 begin
-  if FoldersTreeView.Selected <> nil then
+  if FClickedNode <> nil then
   begin
-    LInfo := FoldersTreeView.Selected.FolderNodeInfo;
+    LInfo := FClickedNode.FolderNodeInfo;
     case LInfo.Kind of
       TFolderNodeKind.Folder:
       begin
@@ -248,6 +284,45 @@ begin
     LInfo := FClickedNode.FolderNodeInfo;
   DeleteItemAction.Text := cDeleteCaptions[LInfo.Kind];
   DeleteItemAction.Enabled := LInfo.Kind in [TFolderNodeKind.Folder, TFolderNodeKind.Request];
+end;
+
+procedure TMainView.EditItemActionExecute(Sender: TObject);
+var
+  LInfo: TFolderNodeInfo;
+  LFolderNodeView: TFolderNodeView;
+  LRequestNodeView: TRequestNodeView;
+begin
+  if FClickedNode <> nil then
+  begin
+    LInfo := FClickedNode.FolderNodeInfo;
+    case LInfo.Kind of
+      TFolderNodeKind.Folder:
+      begin
+        LFolderNodeView := FClickedNode.GetFolderNodeView;
+        if LFolderNodeView <> nil then
+          LFolderNodeView.EnableEditing(True);
+      end;
+      TFolderNodeKind.Request:
+      begin
+        LRequestNodeView := FClickedNode.GetRequestNodeView;
+        if LRequestNodeView <> nil then
+          LRequestNodeView.EnableEditing(True);
+      end;
+    end;
+  end;
+end;
+
+procedure TMainView.EditItemActionUpdate(Sender: TObject);
+const
+  cEditCaptions: array[TFolderNodeKind] of string = ('Edit Folder', 'Edit Folder', 'Edit Request');
+var
+  LInfo: TFolderNodeInfo;
+begin
+  LInfo := Default(TFolderNodeInfo);
+  if (FClickedNode <> nil) then
+    LInfo := FClickedNode.FolderNodeInfo;
+  EditItemAction.Text := cEditCaptions[LInfo.Kind];
+  EditItemAction.Enabled := LInfo.Kind in [TFolderNodeKind.Folder, TFolderNodeKind.Request];
 end;
 
 procedure TMainView.SendActionExecute(Sender: TObject);
@@ -370,7 +445,7 @@ begin
     end;
     LParent := LNode;
     if AFocusView then
-      LView.GainFocus;
+      LView.EnableEditing(True);
   end
   else
     LParent := AParent;
@@ -404,7 +479,7 @@ begin
   LView.OnDescriptionChange := RequestNodeDescriptionChangeHandler;
   LView.Parent := Result;
   if AFocusView then
-    LView.GainFocus;
+    LView.EnableEditing(True);
 end;
 
 procedure TMainView.AddFolderNodes;

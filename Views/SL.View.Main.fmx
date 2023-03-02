@@ -170,8 +170,8 @@ object MainView: TMainView
               Size.Height = 764.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 0
-              Viewport.Width = 584.000000000000000000
-              Viewport.Height = 764.000000000000000000
+              Viewport.Width = 580.000000000000000000
+              Viewport.Height = 760.000000000000000000
             end
           end
           object RequestHeadersTab: TTabItem
@@ -247,8 +247,8 @@ object MainView: TMainView
               Size.Height = 731.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 0
-              Viewport.Width = 488.000000000000000000
-              Viewport.Height = 731.000000000000000000
+              Viewport.Width = 484.000000000000000000
+              Viewport.Height = 727.000000000000000000
             end
             object ResponseStatusLayout: TLayout
               Align = Top
@@ -383,6 +383,11 @@ object MainView: TMainView
       Enabled = True
       ImageIndex = -1
     end
+    object FoldersEditMenuItem: TMenuItem
+      Action = EditItemAction
+      Enabled = True
+      ImageIndex = -1
+    end
     object FoldersDeleteMenuItem: TMenuItem
       Action = DeleteItemAction
       Enabled = True
@@ -412,6 +417,11 @@ object MainView: TMainView
       Text = 'Delete'
       OnExecute = DeleteItemActionExecute
       OnUpdate = DeleteItemActionUpdate
+    end
+    object EditItemAction: TAction
+      Text = 'Edit'
+      OnExecute = EditItemActionExecute
+      OnUpdate = EditItemActionUpdate
     end
   end
 end
