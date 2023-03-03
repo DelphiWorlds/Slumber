@@ -410,6 +410,19 @@ object MainView: TMainView
       ImageIndex = -1
     end
   end
+  object SaveDialog: TSaveDialog
+    DefaultExt = 'json'
+    Filter = 'Slumber profiles (*.json)|*.json'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
+    Left = 164
+    Top = 432
+  end
+  object OpenDialog: TOpenDialog
+    DefaultExt = 'json'
+    Filter = 'Slumber profiles (*.json)|*.json'
+    Left = 164
+    Top = 520
+  end
   object ActionList: TActionList
     OnExecute = ActionListExecute
     Left = 165
@@ -448,18 +461,5 @@ object MainView: TMainView
       Text = 'Load..'
       OnExecute = LoadProfileActionExecute
     end
-  end
-  object SaveDialog: TSaveDialog
-    DefaultExt = 'json'
-    Filter = 'Slumber profiles (*.json)|*.json'
-    Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
-    Left = 164
-    Top = 432
-  end
-  object OpenDialog: TOpenDialog
-    DefaultExt = 'json'
-    Filter = 'Slumber profiles (*.json)|*.json'
-    Left = 164
-    Top = 520
   end
 end

@@ -83,13 +83,15 @@ type
     procedure URLEditChange(Sender: TObject);
   private
     FClickedNode: TTreeViewItem;
+    FDefaultHeader: TSlumberHeader;
     FIgnoreTreeViewChange: Boolean;
     FProfile: TSlumberProfile;
     procedure AddActionKinds;
     function AddFolderNode(const AParent: TFmxObject; const AFolder: TSlumberFolder; const AFocusView: Boolean = False): TTreeViewItem;
     procedure AddFolderNodes;
-    procedure AddHeaderView(const AHeaderName: string = ''; const AHeaderValue: string = '');
+    procedure AddHeaderView(const AHeader: TSlumberHeader);
     function AddRequestNode(const AParent: TFmxObject; const ARequest: TSlumberRequest; const AFocusView: Boolean = False): TTreeViewItem;
+    procedure CheckRequestSelected;
     function GetFolderFromNode(const ANode: TTreeViewItem): TSlumberFolder;
     function FindActiveSlumberRequest(out ARequest: TSlumberRequest): Boolean;
     procedure FocusHeaderView;
@@ -210,6 +212,8 @@ begin
   Resources.LoadButtonImage(cButtonImageListPlusIndex, AddItemImage.Bitmap);
   RequestTabControl.ActiveTab := RequestContentTab;
   AddActionKinds;
+  FDefaultHeader := Default(TSlumberHeader);
+  FDefaultHeader.Index := -1;
   NewRequest;
 end;
 
@@ -479,12 +483,18 @@ begin
 end;
 
 procedure TMainView.FoldersTreeViewChange(Sender: TObject);
+begin
+  if not FIgnoreTreeViewChange then
+    CheckRequestSelected;
+end;
+
+procedure TMainView.CheckRequestSelected;
 var
   LRequest: TSlumberRequest;
   LIndex: Integer;
   LHeader: TSlumberHeader;
 begin
-  if not FIgnoreTreeViewChange and FindActiveSlumberRequest(LRequest) then
+  if FindActiveSlumberRequest(LRequest) then
   begin
     LIndex := ActionKindComboBox.Items.IndexOf(LRequest.HTTPMethod);
     if LIndex > -1 then
@@ -493,13 +503,12 @@ begin
     RequestContentMemo.Text := LRequest.Content;
     RequestHeadersVertScrollBox.Content.DeleteChildren;
     for LHeader in LRequest.Headers do
-      AddHeaderView(LHeader.Name, LHeader.Value);
+      AddHeaderView(LHeader);
     if RequestContentMemo.Text.IsEmpty and (Length(LRequest.Headers) > 0) then
       RequestTabControl.ActiveTab := RequestHeadersTab
     else
       RequestTabControl.ActiveTab := RequestContentTab;
-    if Length(LRequest.Headers) = 0 then
-      AddHeaderView;
+    AddHeaderView(FDefaultHeader);
   end;
 end;
 
@@ -595,7 +604,7 @@ begin
   end;
 end;
 
-procedure TMainView.AddHeaderView(const AHeaderName: string = ''; const AHeaderValue: string = '');
+procedure TMainView.AddHeaderView(const AHeader: TSlumberHeader);
 var
   LHeaderView: THeaderView;
   LBottomMost: Single;
@@ -609,10 +618,13 @@ begin
       LBottomMost := LHeaderView.Position.Y;
   end;
   LHeaderView := THeaderView.Create(Self);
-  if not AHeaderName.IsEmpty then
-    LHeaderView.HeaderName := AHeaderName;
-  if not AHeaderValue.IsEmpty then
-    LHeaderView.HeaderValue := AHeaderValue;
+  if not AHeader.Name.IsEmpty then
+    LHeaderView.HeaderName := AHeader.Name;
+  if not AHeader.Value.IsEmpty then
+    LHeaderView.HeaderValue := AHeader.Value;
+  LHeaderView.HeaderIndex := AHeader.Index;
+  LHeaderView.IsHeaderEnabled := AHeader.IsEnabled;
+  LHeaderView.OnActive := HeaderViewActiveHandler;
   LHeaderView.OnDelete := HeaderViewDeleteHandler;
   LHeaderView.OnChanged := HeaderViewChangedHandler;
   LHeaderView.Position.Y := LBottomMost + 1;
@@ -770,8 +782,20 @@ begin
 end;
 
 procedure TMainView.HeaderViewActiveHandler(Sender: TObject);
+var
+  LView: THeaderView;
+  LRequest: TSlumberRequest;
+  LHeader: TSlumberHeader;
 begin
-  AddHeaderView;
+  LView := THeaderView(Sender);
+  if FindActiveSlumberRequest(LRequest) then
+  begin
+    LHeader.IsEnabled := LView.IsHeaderEnabled;
+    LHeader.Name := LView.HeaderName;
+    LHeader.Value := LView.HeaderValue;
+    LView.HeaderIndex := LRequest.AddHeader(LHeader);
+  end;
+  AddHeaderView(FDefaultHeader);
 end;
 
 procedure TMainView.HeaderViewChangedHandler(Sender: TObject);
@@ -797,7 +821,7 @@ procedure TMainView.HeaderViewDeleteHandler(Sender: TObject);
 begin
   Sender.Free;
   if not HasInactiveHeaderView then
-    AddHeaderView
+    AddHeaderView(FDefaultHeader)
   else
     FocusHeaderView;
 end;
@@ -813,7 +837,7 @@ begin
   ResponseStatusTextLabel.Text := '';
   URLEdit.Text := AURL;
   RequestHeadersVertScrollBox.Content.DeleteChildren;
-  AddHeaderView;
+  AddHeaderView(FDefaultHeader);
 end;
 
 end.
