@@ -53,6 +53,13 @@ type
     AddItemImage: TImage;
     EditItemAction: TAction;
     FoldersEditMenuItem: TMenuItem;
+    SaveProfileAction: TAction;
+    FoldersMenuSep1: TMenuItem;
+    SaveProfileMenuItem: TMenuItem;
+    LoadProfileAction: TAction;
+    LoadProfileMenuItem: TMenuItem;
+    SaveDialog: TSaveDialog;
+    OpenDialog: TOpenDialog;
     procedure SendActionExecute(Sender: TObject);
     procedure SendActionUpdate(Sender: TObject);
     procedure DeleteItemActionUpdate(Sender: TObject);
@@ -68,15 +75,23 @@ type
     procedure AddRequestActionUpdate(Sender: TObject);
     procedure EditItemActionUpdate(Sender: TObject);
     procedure EditItemActionExecute(Sender: TObject);
+    procedure ActionKindComboBoxClosePopup(Sender: TObject);
+    procedure SaveProfileActionUpdate(Sender: TObject);
+    procedure SaveProfileActionExecute(Sender: TObject);
+    procedure LoadProfileActionExecute(Sender: TObject);
+    procedure FoldersTreeViewChange(Sender: TObject);
+    procedure URLEditChange(Sender: TObject);
   private
-    FProfile: TSlumberProfile;
     FClickedNode: TTreeViewItem;
+    FIgnoreTreeViewChange: Boolean;
+    FProfile: TSlumberProfile;
     procedure AddActionKinds;
     function AddFolderNode(const AParent: TFmxObject; const AFolder: TSlumberFolder; const AFocusView: Boolean = False): TTreeViewItem;
     procedure AddFolderNodes;
     procedure AddHeaderView(const AHeaderName: string = ''; const AHeaderValue: string = '');
     function AddRequestNode(const AParent: TFmxObject; const ARequest: TSlumberRequest; const AFocusView: Boolean = False): TTreeViewItem;
     function GetFolderFromNode(const ANode: TTreeViewItem): TSlumberFolder;
+    function FindActiveSlumberRequest(out ARequest: TSlumberRequest): Boolean;
     procedure FocusHeaderView;
     procedure FolderNodeDescriptionChangeHandler(Sender: TObject);
     procedure HandleResponse(const AResponse: IHTTPResponse);
@@ -84,7 +99,9 @@ type
     function HasInactiveHeaderView: Boolean;
     procedure HeaderViewActiveHandler(Sender: TObject);
     procedure HeaderViewDeleteHandler(Sender: TObject);
+    procedure HeaderViewChangedHandler(Sender: TObject);
     function IsNodeSelected: Boolean;
+    procedure LoadFromProfile;
     procedure NewRequest(const AURL: string = '');
     procedure RequestNodeDescriptionChangeHandler(Sender: TObject);
     procedure SendRequest;
@@ -111,16 +128,16 @@ const
   cNodeDataFormat = '%s|%s';
 
 type
-  TFolderNodeKind = (None, Folder, Request);
+  TTreeNodeKind = (None, Folder, Request);
 
-  TFolderNodeInfo = record
+  TTreeNodeInfo = record
     ID: string;
-    Kind: TFolderNodeKind;
+    Kind: TTreeNodeKind;
   end;
 
   TTreeViewItemHelper = class helper for TTreeViewItem
   public
-    function FolderNodeInfo: TFolderNodeInfo;
+    function TreeNodeInfo: TTreeNodeInfo;
     function GetFolderNodeView: TFolderNodeView;
     function GetRequestNodeView: TRequestNodeView;
   end;
@@ -132,14 +149,14 @@ type
 
 { TTreeViewItemHelper }
 
-function TTreeViewItemHelper.FolderNodeInfo: TFolderNodeInfo;
+function TTreeViewItemHelper.TreeNodeInfo: TTreeNodeInfo;
 var
   LParts: TArray<string>;
 begin
   LParts := TagString.Split(['|']);
   if Length(LParts) > 1 then
   begin
-    Result.Kind := TFolderNodeKind(StrToIntDef(LParts[0], 0));
+    Result.Kind := TTreeNodeKind(StrToIntDef(LParts[0], 0));
     Result.ID := LParts[1];
   end;
 end;
@@ -204,14 +221,14 @@ end;
 
 function TMainView.GetFolderFromNode(const ANode: TTreeViewItem): TSlumberFolder;
 var
-  LInfo: TFolderNodeInfo;
+  LInfo: TTreeNodeInfo;
 begin
   Result := nil;
-  LInfo := ANode.FolderNodeInfo;
+  LInfo := ANode.TreeNodeInfo;
   case LInfo.Kind of
-    TFolderNodeKind.Folder:
+    TTreeNodeKind.Folder:
       FProfile.FindFolder(LInfo.ID, Result);
-    TFolderNodeKind.Request:
+    TTreeNodeKind.Request:
     begin
       if ANode.ParentItem <> nil then
         Result := GetFolderFromNode(ANode.ParentItem)
@@ -224,7 +241,7 @@ end;
 procedure TMainView.AddFolderActionExecute(Sender: TObject);
 var
   LFolder, LParentFolder: TSlumberFolder;
-  LInfo: TFolderNodeInfo;
+  LInfo: TTreeNodeInfo;
   LParentNode: TTreeViewItem;
 begin
   LParentNode := nil;
@@ -232,7 +249,7 @@ begin
   if HasClickedNode then
   begin
     LParentNode := FClickedNode;
-    if not FProfile.FindFolder(FClickedNode.FolderNodeInfo.ID, LParentFolder) then
+    if not FProfile.FindFolder(FClickedNode.TreeNodeInfo.ID, LParentFolder) then
       // else something is horribly wrong..
   end;
   LFolder := FProfile.AddFolder(LParentFolder);
@@ -242,7 +259,7 @@ end;
 
 procedure TMainView.AddFolderActionUpdate(Sender: TObject);
 begin
-  AddFolderAction.Enabled := not HasClickedNode or (FClickedNode.FolderNodeInfo.Kind = TFolderNodeKind.Folder);
+  AddFolderAction.Enabled := not HasClickedNode or (FClickedNode.TreeNodeInfo.Kind = TTreeNodeKind.Folder);
 end;
 
 procedure TMainView.AddRequestActionExecute(Sender: TObject);
@@ -272,22 +289,22 @@ end;
 
 procedure TMainView.AddRequestActionUpdate(Sender: TObject);
 begin
-  AddRequestAction.Enabled := not HasClickedNode or (FClickedNode.FolderNodeInfo.Kind = TFolderNodeKind.Folder);
+  AddRequestAction.Enabled := not HasClickedNode or (FClickedNode.TreeNodeInfo.Kind = TTreeNodeKind.Folder);
 end;
 
 procedure TMainView.DeleteItemActionExecute(Sender: TObject);
 var
-  LInfo: TFolderNodeInfo;
+  LInfo: TTreeNodeInfo;
 begin
   if HasClickedNode then
   begin
-    LInfo := FClickedNode.FolderNodeInfo;
+    LInfo := FClickedNode.TreeNodeInfo;
     case LInfo.Kind of
-      TFolderNodeKind.Folder:
+      TTreeNodeKind.Folder:
       begin
         // If any sub-nodes, delete them
       end;
-      TFolderNodeKind.Request:
+      TTreeNodeKind.Request:
       begin
         // Check if it is the currently loaded request
       end;
@@ -297,34 +314,34 @@ end;
 
 procedure TMainView.DeleteItemActionUpdate(Sender: TObject);
 const
-  cDeleteCaptions: array[TFolderNodeKind] of string = ('Delete Folder', 'Delete Folder', 'Delete Request');
+  cDeleteCaptions: array[TTreeNodeKind] of string = ('Delete Folder', 'Delete Folder', 'Delete Request');
 var
-  LInfo: TFolderNodeInfo;
+  LInfo: TTreeNodeInfo;
 begin
-  LInfo := Default(TFolderNodeInfo);
+  LInfo := Default(TTreeNodeInfo);
   if (FClickedNode <> nil) then
-    LInfo := FClickedNode.FolderNodeInfo;
+    LInfo := FClickedNode.TreeNodeInfo;
   DeleteItemAction.Text := cDeleteCaptions[LInfo.Kind];
-  DeleteItemAction.Enabled := LInfo.Kind in [TFolderNodeKind.Folder, TFolderNodeKind.Request];
+  DeleteItemAction.Enabled := LInfo.Kind in [TTreeNodeKind.Folder, TTreeNodeKind.Request];
 end;
 
 procedure TMainView.EditItemActionExecute(Sender: TObject);
 var
-  LInfo: TFolderNodeInfo;
+  LInfo: TTreeNodeInfo;
   LFolderNodeView: TFolderNodeView;
   LRequestNodeView: TRequestNodeView;
 begin
   if HasClickedNode then
   begin
-    LInfo := FClickedNode.FolderNodeInfo;
+    LInfo := FClickedNode.TreeNodeInfo;
     case LInfo.Kind of
-      TFolderNodeKind.Folder:
+      TTreeNodeKind.Folder:
       begin
         LFolderNodeView := FClickedNode.GetFolderNodeView;
         if LFolderNodeView <> nil then
           LFolderNodeView.EnableEditing(True);
       end;
-      TFolderNodeKind.Request:
+      TTreeNodeKind.Request:
       begin
         LRequestNodeView := FClickedNode.GetRequestNodeView;
         if LRequestNodeView <> nil then
@@ -336,15 +353,20 @@ end;
 
 procedure TMainView.EditItemActionUpdate(Sender: TObject);
 const
-  cEditCaptions: array[TFolderNodeKind] of string = ('Edit Folder', 'Edit Folder', 'Edit Request');
+  cEditCaptions: array[TTreeNodeKind] of string = ('Edit Folder', 'Edit Folder', 'Edit Request');
 var
-  LInfo: TFolderNodeInfo;
+  LInfo: TTreeNodeInfo;
 begin
-  LInfo := Default(TFolderNodeInfo);
+  LInfo := Default(TTreeNodeInfo);
   if HasClickedNode then
-    LInfo := FClickedNode.FolderNodeInfo;
+    LInfo := FClickedNode.TreeNodeInfo;
   EditItemAction.Text := cEditCaptions[LInfo.Kind];
-  EditItemAction.Enabled := LInfo.Kind in [TFolderNodeKind.Folder, TFolderNodeKind.Request];
+  EditItemAction.Enabled := LInfo.Kind in [TTreeNodeKind.Folder, TTreeNodeKind.Request];
+end;
+
+procedure TMainView.SaveProfileActionUpdate(Sender: TObject);
+begin
+  SaveProfileAction.Enabled := not FProfile.IsEmpty;
 end;
 
 procedure TMainView.SendActionExecute(Sender: TObject);
@@ -367,7 +389,7 @@ begin
     for I := 0 to RequestHeadersVertScrollBox.Content.ChildrenCount - 1 do
     begin
       LHeaderView := THeaderView(RequestHeadersVertScrollBox.Content.Children[I]);
-      if LHeaderView.IsChecked and not LHeaderView.HeaderValue.IsEmpty then
+      if LHeaderView.IsHeaderEnabled and not LHeaderView.HeaderValue.IsEmpty then
         LClient.Headers[LHeaderView.HeaderName] := LHeaderView.HeaderValue;
     end;
     LResponse := LClient.Send(URLEdit.Text, THTTPMethod.Get, RequestContentMemo.Text);
@@ -392,6 +414,17 @@ procedure TMainView.SendActionUpdate(Sender: TObject);
 begin
   // Can send if:
   //   Valid URL ("turn it red" if invalid)
+end;
+
+procedure TMainView.ActionKindComboBoxClosePopup(Sender: TObject);
+var
+  LRequest: TSlumberRequest;
+begin
+  if FindActiveSlumberRequest(LRequest) then
+  begin
+    LRequest.HTTPMethod := ActionKindComboBox.Items[ActionKindComboBox.ItemIndex];
+    UpdateRequestNode(FoldersTreeView.Selected, LRequest);
+  end;
 end;
 
 procedure TMainView.ActionListExecute(Action: TBasicAction; var Handled: Boolean);
@@ -427,13 +460,47 @@ begin
   end;
 end;
 
+procedure TMainView.URLEditChange(Sender: TObject);
+var
+  LRequest: TSlumberRequest;
+begin
+  if FindActiveSlumberRequest(LRequest) then
+    LRequest.URL := URLEdit.Text;
+end;
+
 procedure TMainView.FolderNodeDescriptionChangeHandler(Sender: TObject);
 var
-  // LNode: TTreeViewItem;
   LView: TFolderNodeView;
+  LFolder: TSlumberFolder;
 begin
   LView := TFolderNodeView(Sender);
-  //
+  if FProfile.FindFolder(LView.ID, LFolder) then
+    LFolder.Name := LView.Description;
+end;
+
+procedure TMainView.FoldersTreeViewChange(Sender: TObject);
+var
+  LRequest: TSlumberRequest;
+  LIndex: Integer;
+  LHeader: TSlumberHeader;
+begin
+  if not FIgnoreTreeViewChange and FindActiveSlumberRequest(LRequest) then
+  begin
+    LIndex := ActionKindComboBox.Items.IndexOf(LRequest.HTTPMethod);
+    if LIndex > -1 then
+      ActionKindComboBox.ItemIndex := LIndex;
+    URLEdit.Text := LRequest.URL;
+    RequestContentMemo.Text := LRequest.Content;
+    RequestHeadersVertScrollBox.Content.DeleteChildren;
+    for LHeader in LRequest.Headers do
+      AddHeaderView(LHeader.Name, LHeader.Value);
+    if RequestContentMemo.Text.IsEmpty and (Length(LRequest.Headers) > 0) then
+      RequestTabControl.ActiveTab := RequestHeadersTab
+    else
+      RequestTabControl.ActiveTab := RequestContentTab;
+    if Length(LRequest.Headers) = 0 then
+      AddHeaderView;
+  end;
 end;
 
 function TMainView.AddFolderNode(const AParent: TFmxObject; const AFolder: TSlumberFolder; const AFocusView: Boolean = False): TTreeViewItem;
@@ -481,9 +548,11 @@ procedure TMainView.RequestNodeDescriptionChangeHandler(Sender: TObject);
 var
   // LNode: TTreeViewItem;
   LView: TRequestNodeView;
+  LRequest: TSlumberRequest;
 begin
   LView := TRequestNodeView(Sender);
-  //
+  if FProfile.FindRequest(LView.ID, LRequest) then
+    LRequest.Name := LView.Description;
 end;
 
 function TMainView.AddRequestNode(const AParent: TFmxObject; const ARequest: TSlumberRequest; const AFocusView: Boolean = False): TTreeViewItem;
@@ -500,6 +569,7 @@ begin
   LView.ID := ARequest.ID;
   LView.HTTPMethod := ARequest.HTTPMethod;
   LView.Description := ARequest.Name;
+  LView.Margins.Left := 12;
   LView.OnDescriptionChange := RequestNodeDescriptionChangeHandler;
   LView.Parent := Result;
   if AFocusView then
@@ -543,8 +613,8 @@ begin
     LHeaderView.HeaderName := AHeaderName;
   if not AHeaderValue.IsEmpty then
     LHeaderView.HeaderValue := AHeaderValue;
-  LHeaderView.OnActive := HeaderViewActiveHandler;
   LHeaderView.OnDelete := HeaderViewDeleteHandler;
+  LHeaderView.OnChanged := HeaderViewChangedHandler;
   LHeaderView.Position.Y := LBottomMost + 1;
   LHeaderView.Parent := RequestHeadersVertScrollBox;
 end;
@@ -582,6 +652,19 @@ begin
   AddItemPopupMenu.Tag := 0;
 end;
 
+function TMainView.FindActiveSlumberRequest(out ARequest: TSlumberRequest): Boolean;
+var
+  LInfo: TTreeNodeInfo;
+begin
+  Result := False;
+  if IsNodeSelected then
+  begin
+    LInfo := FoldersTreeView.Selected.TreeNodeInfo;
+    if LInfo.Kind = TTreeNodeKind.Request then
+      Result := FProfile.FindRequest(LInfo.ID, ARequest);
+  end;
+end;
+
 procedure TMainView.FocusHeaderView;
 var
   LHeaderView: THeaderView;
@@ -597,15 +680,15 @@ end;
 
 procedure TMainView.ItemEditChangeTracking(Sender: TObject);
 var
-  LInfo: TFolderNodeInfo;
+  LInfo: TTreeNodeInfo;
   LFolder: TSlumberFolder;
   LRequest: TSlumberRequest;
 begin
   if IsNodeSelected then
   begin
-    LInfo := FoldersTreeView.Selected.FolderNodeInfo;
+    LInfo := FoldersTreeView.Selected.TreeNodeInfo;
     case LInfo.Kind of
-      TFolderNodeKind.Folder:
+      TTreeNodeKind.Folder:
       begin
         if FProfile.FindFolder(LInfo.ID, LFolder) then
         begin
@@ -613,7 +696,7 @@ begin
           UpdateFolderNode(FoldersTreeView.Selected, LFolder);
         end;
       end;
-      TFolderNodeKind.Request:
+      TTreeNodeKind.Request:
       begin
         if FProfile.FindRequest(LInfo.ID, LRequest) then
         begin
@@ -623,6 +706,45 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TMainView.LoadProfileActionExecute(Sender: TObject);
+begin
+  if OpenDialog.Execute then
+  begin
+    FProfile.LoadFromFile(OpenDialog.FileName);
+    LoadFromProfile;
+  end;
+end;
+
+procedure TMainView.LoadFromProfile;
+var
+  I: Integer;
+  LNode: TTreeViewItem;
+begin
+  FIgnoreTreeViewChange := True;
+  try
+    FoldersTreeView.Clear;
+    AddFolderNodes;
+  finally
+    FIgnoreTreeViewChange := False;
+  end;
+  for I := 0 to FoldersTreeView.Count - 1 do
+  begin
+    LNode := FoldersTreeView.Items[I];
+    if (LNode.Level = 1) and (LNode.TreeNodeInfo.Kind = TTreeNodeKind.Folder) then
+    begin
+      LNode.Expand;
+      FoldersTreeView.Selected := LNode;
+      Break;
+    end;
+  end;
+end;
+
+procedure TMainView.SaveProfileActionExecute(Sender: TObject);
+begin
+  if SaveDialog.Execute then
+    FProfile.SaveToFile(SaveDialog.FileName);
 end;
 
 function TMainView.HasClickedNode: Boolean;
@@ -650,6 +772,25 @@ end;
 procedure TMainView.HeaderViewActiveHandler(Sender: TObject);
 begin
   AddHeaderView;
+end;
+
+procedure TMainView.HeaderViewChangedHandler(Sender: TObject);
+var
+  LRequest: TSlumberRequest;
+  LView: THeaderView;
+  LHeaderIndex: Integer;
+begin
+  if FindActiveSlumberRequest(LRequest) then
+  begin
+    LView := THeaderView(Sender);
+    LHeaderIndex := LRequest.IndexOfHeader(LView.HeaderIndex);
+    if LHeaderIndex > -1 then
+    begin
+      LRequest.Headers[LHeaderIndex].IsEnabled := LView.IsHeaderEnabled;
+      LRequest.Headers[LHeaderIndex].Name := LView.HeaderName;
+      LRequest.Headers[LHeaderIndex].Value := LView.HeaderValue;
+    end;
+  end;
 end;
 
 procedure TMainView.HeaderViewDeleteHandler(Sender: TObject);

@@ -56,6 +56,7 @@ object MainView: TMainView
         Size.PlatformDefault = False
         TabOrder = 2
         ItemHeight = 36.000000000000000000
+        OnChange = FoldersTreeViewChange
         Viewport.Width = 338.000000000000000000
         Viewport.Height = 828.000000000000000000
       end
@@ -135,7 +136,7 @@ object MainView: TMainView
           Size.Width = 600.000000000000000000
           Size.Height = 806.000000000000000000
           Size.PlatformDefault = False
-          TabIndex = 0
+          TabIndex = 1
           TabOrder = 1
           TabPosition = PlatformDefault
           Sizes = (
@@ -147,7 +148,7 @@ object MainView: TMainView
             CustomIcon = <
               item
               end>
-            IsSelected = True
+            IsSelected = False
             Size.Width = 63.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
@@ -178,7 +179,7 @@ object MainView: TMainView
             CustomIcon = <
               item
               end>
-            IsSelected = False
+            IsSelected = True
             Size.Width = 64.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
@@ -321,6 +322,7 @@ object MainView: TMainView
             Size.Height = 24.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 0
+            OnClosePopup = ActionKindComboBoxClosePopup
           end
         end
         object URLLayout: TLayout
@@ -339,6 +341,7 @@ object MainView: TMainView
             Size.Width = 855.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
+            OnChange = URLEditChange
           end
         end
         object SendButton: TButton
@@ -393,6 +396,19 @@ object MainView: TMainView
       Enabled = True
       ImageIndex = -1
     end
+    object FoldersMenuSep1: TMenuItem
+      Text = '-'
+    end
+    object LoadProfileMenuItem: TMenuItem
+      Action = LoadProfileAction
+      Enabled = True
+      ImageIndex = -1
+    end
+    object SaveProfileMenuItem: TMenuItem
+      Action = SaveProfileAction
+      Enabled = True
+      ImageIndex = -1
+    end
   end
   object ActionList: TActionList
     OnExecute = ActionListExecute
@@ -423,5 +439,27 @@ object MainView: TMainView
       OnExecute = EditItemActionExecute
       OnUpdate = EditItemActionUpdate
     end
+    object SaveProfileAction: TAction
+      Text = 'Save..'
+      OnExecute = SaveProfileActionExecute
+      OnUpdate = SaveProfileActionUpdate
+    end
+    object LoadProfileAction: TAction
+      Text = 'Load..'
+      OnExecute = LoadProfileActionExecute
+    end
+  end
+  object SaveDialog: TSaveDialog
+    DefaultExt = 'json'
+    Filter = 'Slumber profiles (*.json)|*.json'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
+    Left = 164
+    Top = 432
+  end
+  object OpenDialog: TOpenDialog
+    DefaultExt = 'json'
+    Filter = 'Slumber profiles (*.json)|*.json'
+    Left = 164
+    Top = 520
   end
 end
