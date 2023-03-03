@@ -290,33 +290,31 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="Views\SL.View.Main.pas">
-            <Form>MainView</Form>
+        <DCCReference Include="Core\SL.Client.pas"/>
+        <DCCReference Include="Core\SL.Consts.pas"/>
+        <DCCReference Include="Models\SL.Model.Profile.pas"/>
+        <DCCReference Include="Core\SL.NodeEdit.pas"/>
+        <DCCReference Include="Core\SL.Resources.pas">
+            <Form>Resources</Form>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Storage\SL.Storage.Profile.pas"/>
+        <DCCReference Include="Core\SL.Types.pas"/>
+        <DCCReference Include="Views\SL.View.FolderNode.pas">
+            <Form>FolderNodeView</Form>
+            <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="Views\SL.View.Header.pas">
             <Form>HeaderView</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
-        <DCCReference Include="Core\SL.Types.pas"/>
-        <DCCReference Include="Core\SL.Consts.pas"/>
-        <DCCReference Include="Core\SL.Client.pas"/>
-        <DCCReference Include="Core\SL.Resources.pas">
-            <Form>Resources</Form>
-            <DesignClass>TDataModule</DesignClass>
+        <DCCReference Include="Views\SL.View.Main.pas">
+            <Form>MainView</Form>
         </DCCReference>
-        <DCCReference Include="Models\SL.Model.Profile.pas"/>
-        <DCCReference Include="Storage\SL.Storage.Profile.pas"/>
         <DCCReference Include="Views\SL.View.RequestNode.pas">
             <Form>RequestNodeView</Form>
-            <FormType>fmx</FormType>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
-        <DCCReference Include="Views\SL.View.FolderNode.pas">
-            <Form>FolderNodeView</Form>
-            <FormType>fmx</FormType>
-            <DesignClass>TFrame</DesignClass>
-        </DCCReference>
-        <DCCReference Include="Core\SL.NodeEdit.pas"/>
         <RcCompile Include="Resources\ButtonIcons.rc">
             <Form>ButtonIcons.res</Form>
         </RcCompile>
