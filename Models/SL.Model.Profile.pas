@@ -6,21 +6,30 @@ uses
   System.Net.URLClient, System.Generics.Collections;
 
 type
-  TSlumberHeaders = TArray<TNameValuePair>;
+  TSlumberHeader = record
+    Index: Integer;
+    IsEnabled: Boolean;
+    Name: string;
+    Value: string;
+  end;
+
+  TSlumberHeaders = TArray<TSlumberHeader>;
 
   TSlumberFolder = class;
 
   TSlumberRequest = class(TObject)
   private
-    FContent: string;
     FFolder: TSlumberFolder;
+  protected
+    FContent: string;
     FHeaders: TSlumberHeaders;
     FHTTPMethod: string;
     FID: string;
     FName: string;
     FURL: string;
   public
-    constructor Create(const AFolder: TSlumberFolder);
+    constructor Create(const AFolder: TSlumberFolder; const AID: string = '');
+    function IndexOfHeader(const AIndex: Integer): Integer;
     property Content: string read FContent write FContent;
     property Folder: TSlumberFolder read FFolder;
     property Headers: TSlumberHeaders read FHeaders write FHeaders;
@@ -33,13 +42,13 @@ type
   TSlumberRequests = TObjectList<TSlumberRequest>;
 
   TSlumberFolder = class(TObject)
-  private
+  protected
     FID: string;
     FName: string;
     FParentID: string;
     FRequests: TSlumberRequests;
-  protected
     function FindRequest( const AID: string; out ARequest: TSlumberRequest): Boolean;
+    function IsEmpty: Boolean;
     procedure SetParentID(const AParentID: string);
   public
     constructor Create(const AID: string = '');
@@ -66,6 +75,7 @@ type
     function AddFolder(const AParent: TSlumberFolder): TSlumberFolder;
     function FindFolder(const AID: string; out AFolder: TSlumberFolder): Boolean;
     function FindRequest(const AID: string; out ARequest: TSlumberRequest): Boolean;
+    function IsEmpty: Boolean;
     property Folders: TSlumberFolders read FFolders;
     property RootFolder: TSlumberFolder read GetRootFolder;
   end;
@@ -81,11 +91,29 @@ const
 
 { TSlumberRequest }
 
-constructor TSlumberRequest.Create(const AFolder: TSlumberFolder);
+constructor TSlumberRequest.Create(const AFolder: TSlumberFolder; const AID: string = '');
 begin
   inherited Create;
   FFolder := AFolder;
-  FID := TSlumberProfile.GetNewID;
+  if AID.IsEmpty then
+    FID := TSlumberProfile.GetNewID
+  else
+    FID := AID;
+end;
+
+function TSlumberRequest.IndexOfHeader(const AIndex: Integer): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  for I := 0 to Length(FHeaders) do
+  begin
+    if FHeaders[I].Index = AIndex then
+    begin
+      Result := I;
+      Break;
+    end;
+  end;
 end;
 
 { TSlumberFolder }
@@ -97,6 +125,8 @@ begin
     FID := TSlumberProfile.GetNewID
   else
     FID := AID;
+  if AID.Equals(cRootFolderID) then
+    FName := 'Root';
   FRequests := TSlumberRequests.Create
 end;
 
@@ -120,6 +150,11 @@ begin
       Break;
     end;
   end;
+end;
+
+function TSlumberFolder.IsEmpty: Boolean;
+begin
+  Result := FRequests.Count = 0;
 end;
 
 function TSlumberFolder.IsRoot: Boolean;
@@ -179,6 +214,14 @@ begin
       Break;
     end;
   end;
+end;
+
+function TSlumberProfile.IsEmpty: Boolean;
+var
+  LRoot: TSlumberFolder;
+begin
+  LRoot := GetRootFolder;
+  Result := (LRoot = nil) or (LRoot.IsEmpty and (FFolders.Count = 1));
 end;
 
 function TSlumberProfile.FindFolder(const AID: string; out AFolder: TSlumberFolder): Boolean;
