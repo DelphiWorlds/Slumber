@@ -43,6 +43,7 @@ type
     procedure SetHeaderIndex(const Value: Integer);
     procedure SetHeaderName(const Value: string);
     procedure SetHeaderValue(const Value: string);
+    procedure SetIsHeaderEnabled(const Value: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
     function GainFocus: Boolean;
@@ -50,7 +51,7 @@ type
     property HeaderName: string read GetHeaderName write SetHeaderName;
     property HeaderValue: string read GetHeaderValue write SetHeaderValue;
     property IsActive: Boolean read FIsActive;
-    property IsHeaderEnabled: Boolean read GetIsHeaderEnabled;
+    property IsHeaderEnabled: Boolean read GetIsHeaderEnabled write SetIsHeaderEnabled;
     property OnActive: TNotifyEvent read FOnActive write FOnActive;
     property OnChanged: TNotifyEvent read FOnChanged write FOnChanged;
     property OnDelete: TNotifyEvent read FOnDelete write FOnDelete;
@@ -162,6 +163,7 @@ end;
 procedure THeaderView.SetHeaderIndex(const Value: Integer);
 begin
   FHeaderIndex := Value;
+  SetIsActive(FHeaderIndex > -1);
 end;
 
 procedure THeaderView.SetHeaderName(const Value: string);
@@ -194,20 +196,22 @@ end;
 
 procedure THeaderView.SetIsActive(const Value: Boolean);
 begin
-  if FIsActive <> Value then
-  begin
-    FIsActive := Value;
-    if FIsActive then
-      Resources.LoadButtonImage(cButtonImageGrabIndex, ActionImage.Bitmap)
-    else
-      Resources.LoadButtonImage(cButtonImageCogIndex, ActionImage.Bitmap);
-    HeaderKindComboBox.Visible := FIsActive;
-    HeaderValueEdit.Visible := FIsActive;
-    EnabledCheckBox.Visible := FIsActive;
-    EnabledCheckBox.IsChecked := FIsActive;
-    DeleteButton.Visible := FIsActive;
-    NewHeaderLabel.Visible := not FIsActive;
-  end;
+  FIsActive := Value;
+  if FIsActive then
+    Resources.LoadButtonImage(cButtonImageGrabIndex, ActionImage.Bitmap)
+  else
+    Resources.LoadButtonImage(cButtonImageCogIndex, ActionImage.Bitmap);
+  HeaderKindComboBox.Visible := FIsActive;
+  HeaderValueEdit.Visible := FIsActive;
+  EnabledCheckBox.Visible := FIsActive;
+  EnabledCheckBox.IsChecked := FIsActive;
+  DeleteButton.Visible := FIsActive;
+  NewHeaderLabel.Visible := not FIsActive;
+end;
+
+procedure THeaderView.SetIsHeaderEnabled(const Value: Boolean);
+begin
+  EnabledCheckBox.IsChecked := Value;
 end;
 
 end.
