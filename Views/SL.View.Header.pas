@@ -27,6 +27,7 @@ type
   private
     FIsActive: Boolean;
     FHeaderIndex: Integer;
+    FHeaderKindIndex: Integer;
     FOnActive: TNotifyEvent;
     FOnChanged: TNotifyEvent;
     FOnDelete: TNotifyEvent;
@@ -34,19 +35,22 @@ type
     procedure DoChanged;
     procedure DoDelete;
     procedure FocusHeaderValueEdit;
+    function GetHeaderIndex: Integer;
     function GetHeaderName: string;
     function GetHeaderValue: string;
-    function GetIsChecked: Boolean;
+    function GetIsHeaderEnabled: Boolean;
     procedure SetIsActive(const Value: Boolean);
+    procedure SetHeaderIndex(const Value: Integer);
     procedure SetHeaderName(const Value: string);
     procedure SetHeaderValue(const Value: string);
   public
     constructor Create(AOwner: TComponent); override;
     function GainFocus: Boolean;
+    property HeaderIndex: Integer read GetHeaderIndex write SetHeaderIndex;
     property HeaderName: string read GetHeaderName write SetHeaderName;
     property HeaderValue: string read GetHeaderValue write SetHeaderValue;
     property IsActive: Boolean read FIsActive;
-    property IsChecked: Boolean read GetIsChecked;
+    property IsHeaderEnabled: Boolean read GetIsHeaderEnabled;
     property OnActive: TNotifyEvent read FOnActive write FOnActive;
     property OnChanged: TNotifyEvent read FOnChanged write FOnChanged;
     property OnDelete: TNotifyEvent read FOnDelete write FOnDelete;
@@ -71,7 +75,7 @@ begin
   SetIsActive(False);
 end;
 
-function THeaderView.GetIsChecked: Boolean;
+function THeaderView.GetIsHeaderEnabled: Boolean;
 begin
   Result := EnabledCheckBox.IsChecked;
 end;
@@ -119,6 +123,11 @@ begin
     Result := False;
 end;
 
+function THeaderView.GetHeaderIndex: Integer;
+begin
+  Result := FHeaderIndex;
+end;
+
 function THeaderView.GetHeaderName: string;
 begin
   Result := '';
@@ -133,7 +142,7 @@ end;
 
 procedure THeaderView.HeaderKindComboBoxClosePopup(Sender: TObject);
 begin
-  if HeaderKindComboBox.ItemIndex <> FHeaderIndex then
+  if HeaderKindComboBox.ItemIndex <> FHeaderKindIndex then
   begin
     FocusHeaderValueEdit;
     DoChanged;
@@ -142,12 +151,17 @@ end;
 
 procedure THeaderView.HeaderKindComboBoxPopup(Sender: TObject);
 begin
-  FHeaderIndex := HeaderKindComboBox.ItemIndex;
+  FHeaderKindIndex := HeaderKindComboBox.ItemIndex;
 end;
 
 procedure THeaderView.HeaderValueEditChangeTracking(Sender: TObject);
 begin
   DoChanged;
+end;
+
+procedure THeaderView.SetHeaderIndex(const Value: Integer);
+begin
+  FHeaderIndex := Value;
 end;
 
 procedure THeaderView.SetHeaderName(const Value: string);
@@ -180,17 +194,20 @@ end;
 
 procedure THeaderView.SetIsActive(const Value: Boolean);
 begin
-  FIsActive := Value;
-  if FIsActive then
-    Resources.LoadButtonImage(cButtonImageGrabIndex, ActionImage.Bitmap)
-  else
-    Resources.LoadButtonImage(cButtonImageCogIndex, ActionImage.Bitmap);
-  HeaderKindComboBox.Visible := FIsActive;
-  HeaderValueEdit.Visible := FIsActive;
-  EnabledCheckBox.Visible := FIsActive;
-  EnabledCheckBox.IsChecked := FIsActive;
-  DeleteButton.Visible := FIsActive;
-  NewHeaderLabel.Visible := not FIsActive;
+  if FIsActive <> Value then
+  begin
+    FIsActive := Value;
+    if FIsActive then
+      Resources.LoadButtonImage(cButtonImageGrabIndex, ActionImage.Bitmap)
+    else
+      Resources.LoadButtonImage(cButtonImageCogIndex, ActionImage.Bitmap);
+    HeaderKindComboBox.Visible := FIsActive;
+    HeaderValueEdit.Visible := FIsActive;
+    EnabledCheckBox.Visible := FIsActive;
+    EnabledCheckBox.IsChecked := FIsActive;
+    DeleteButton.Visible := FIsActive;
+    NewHeaderLabel.Visible := not FIsActive;
+  end;
 end;
 
 end.
