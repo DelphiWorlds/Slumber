@@ -17,6 +17,7 @@ object FolderNodeView: TFolderNodeView
     Size.Width = 334.000000000000000000
     Size.Height = 27.000000000000000000
     Size.PlatformDefault = False
+    OnChange = DescriptionEditChange
     OnKeyDown = DescriptionEditKeyDown
     OnExit = DescriptionEditExit
   end

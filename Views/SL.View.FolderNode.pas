@@ -12,9 +12,12 @@ type
     DescriptionEdit: TEdit;
     procedure DescriptionEditKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
     procedure DescriptionEditExit(Sender: TObject);
+    procedure DescriptionEditChange(Sender: TObject);
   private
     FID: string;
+    FIsModified: Boolean;
     FOnDescriptionChange: TNotifyEvent;
+    procedure DoDescriptionChange;
     function GetDescription: string;
     procedure SetDescription(const Value: string);
   public
@@ -39,6 +42,11 @@ begin
   EnableEditing(False);
 end;
 
+procedure TFolderNodeView.DescriptionEditChange(Sender: TObject);
+begin
+  FIsModified := True;
+end;
+
 procedure TFolderNodeView.DescriptionEditExit(Sender: TObject);
 begin
   EnableEditing(False);
@@ -53,6 +61,12 @@ begin
   end;
 end;
 
+procedure TFolderNodeView.DoDescriptionChange;
+begin
+  if Assigned(FOnDescriptionChange) then
+    FOnDescriptionChange(Self);
+end;
+
 procedure TFolderNodeView.EnableEditing(const AEnable: Boolean);
 const
   cEditingOpacity: array[Boolean] of Single = (0.8, 1);
@@ -63,6 +77,8 @@ begin
   else
     DescriptionEdit.ResetFocus;
   DescriptionEdit.Opacity := cEditingOpacity[AEnable];
+  if not AEnable and FIsModified then
+    DoDescriptionChange;
 end;
 
 function TFolderNodeView.GetDescription: string;
@@ -73,6 +89,7 @@ end;
 procedure TFolderNodeView.SetDescription(const Value: string);
 begin
   DescriptionEdit.Text := Value;
+  FIsModified := False;
 end;
 
 end.
