@@ -13,9 +13,12 @@ type
     DescriptionEdit: TEdit;
     procedure DescriptionEditKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
     procedure DescriptionEditExit(Sender: TObject);
+    procedure DescriptionEditChange(Sender: TObject);
   private
     FID: string;
+    FIsModified: Boolean;
     FOnDescriptionChange: TNotifyEvent;
+    procedure DoDescriptionChange;
     function GetDescription: string;
     function GetHTTPMethod: string;
     procedure SetDescription(const Value: string);
@@ -44,6 +47,11 @@ begin
   EnableEditing(False);
 end;
 
+procedure TRequestNodeView.DescriptionEditChange(Sender: TObject);
+begin
+  FIsModified := True;
+end;
+
 procedure TRequestNodeView.DescriptionEditExit(Sender: TObject);
 begin
   EnableEditing(False);
@@ -58,6 +66,12 @@ begin
   end;
 end;
 
+procedure TRequestNodeView.DoDescriptionChange;
+begin
+  if Assigned(FOnDescriptionChange) then
+    FOnDescriptionChange(Self);
+end;
+
 procedure TRequestNodeView.EnableEditing(const AEnable: Boolean);
 const
   cEditingOpacity: array[Boolean] of Single = (0.8, 1);
@@ -68,6 +82,8 @@ begin
   else
     DescriptionEdit.ResetFocus;
   DescriptionEdit.Opacity := cEditingOpacity[AEnable];
+  if not AEnable and FIsModified then
+    DoDescriptionChange;
 end;
 
 function TRequestNodeView.GetDescription: string;
@@ -83,6 +99,7 @@ end;
 procedure TRequestNodeView.SetDescription(const Value: string);
 begin
   DescriptionEdit.Text := Value;
+  FIsModified := False;
 end;
 
 procedure TRequestNodeView.SetHTTPMethod(const Value: string);
