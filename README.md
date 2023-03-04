@@ -21,7 +21,7 @@ If you wish to join, please post in the discussions section or in the Delphi Wor
 * [SVGIconImageList](https://github.com/EtheaDev/SVGIconImageList)
 * [Kastri](https://github.com/DelphiWorlds/Kastri)
 
-Note: Although there is a dependency on SVGIconImageList, the project creates the required classes at run-time, so there is no need to install the SVGIconImageList components, however
+Note: Although there is a dependency on SVGIconImageList, the project creates the required classes at run-time, so there is no need to install the SVGIconImageList components. See also [Project search paths](#project-search-paths) regarding the include file.
 
 ## Configuration
 
@@ -59,6 +59,11 @@ The color value should be a value that matches the style being used.
 * Implement collections like Postman and Insomnia etc
 
 ## Status
+
+### 04-Mar-2023
+
+* Now supports loading/saving of "profiles" (in JSON format). May not be 100% complete
+* Fixed a bunch of issues
 
 ### 01-Mar-2023
 
