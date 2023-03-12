@@ -29,6 +29,7 @@ type
     FURL: string;
   public
     constructor Create(const AFolder: TSlumberFolder; const AID: string = '');
+    function AddHeader(const AHeader: TSlumberHeader): Integer;
     function IndexOfHeader(const AIndex: Integer): Integer;
     property Content: string read FContent write FContent;
     property Folder: TSlumberFolder read FFolder;
@@ -106,7 +107,7 @@ var
   I: Integer;
 begin
   Result := -1;
-  for I := 0 to Length(FHeaders) do
+  for I := 0 to Length(FHeaders) - 1 do
   begin
     if FHeaders[I].Index = AIndex then
     begin
@@ -114,6 +115,14 @@ begin
       Break;
     end;
   end;
+end;
+
+function TSlumberRequest.AddHeader(const AHeader: TSlumberHeader): Integer;
+begin
+  Result := Length(FHeaders);
+  SetLength(FHeaders, Result + 1);
+  FHeaders[Result] := AHeader;
+  FHeaders[Result].Index := Result;
 end;
 
 { TSlumberFolder }
