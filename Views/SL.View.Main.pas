@@ -555,7 +555,6 @@ end;
 
 procedure TMainView.RequestNodeDescriptionChangeHandler(Sender: TObject);
 var
-  // LNode: TTreeViewItem;
   LView: TRequestNodeView;
   LRequest: TSlumberRequest;
 begin
