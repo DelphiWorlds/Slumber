@@ -81,6 +81,8 @@ type
     procedure LoadProfileActionExecute(Sender: TObject);
     procedure FoldersTreeViewChange(Sender: TObject);
     procedure URLEditChange(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
+    procedure RequestContentMemoChange(Sender: TObject);
   private
     FClickedNode: TTreeViewItem;
     FDefaultHeader: TSlumberHeader;
@@ -122,6 +124,7 @@ implementation
 {$R *.fmx}
 
 uses
+  System.IOUtils, System.JSON,
   FMX.Platform,
   DW.JSON, DW.IOUtils.Helpers,
   SL.View.Header, SL.Consts, SL.Types, SL.Resources, SL.Storage.Profile, SL.View.FolderNode, SL.View.RequestNode;
@@ -141,6 +144,7 @@ type
   public
     function TreeNodeInfo: TTreeNodeInfo;
     function GetFolderNodeView: TFolderNodeView;
+    function GetFirstRequestNode: TTreeViewItem;
     function GetRequestNodeView: TRequestNodeView;
   end;
 
@@ -148,6 +152,19 @@ type
   public
     procedure UpdateActions;
   end;
+
+function GetHTTPMethod(const AValue: string): THTTPMethod;
+begin
+  Result := THTTPMethod.Get;
+  if AValue.Equals('POST') then
+    Result := THTTPMethod.Post
+  else if AValue.Equals('PUT') then
+    Result := THTTPMethod.Put
+  else if AValue.Equals('PATCH') then
+    Result := THTTPMethod.Patch
+  else if AValue.Equals('DELETE') then
+    Result := THTTPMethod.Delete;
+end;
 
 { TTreeViewItemHelper }
 
@@ -160,6 +177,40 @@ begin
   begin
     Result.Kind := TTreeNodeKind(StrToIntDef(LParts[0], 0));
     Result.ID := LParts[1];
+  end;
+end;
+
+function TTreeViewItemHelper.GetFirstRequestNode: TTreeViewItem;
+var
+  I: Integer;
+  LNode: TTreeViewItem;
+  LClass: string;
+begin
+  Result := nil;
+  for I := 0 to Count - 1 do
+  begin
+    LNode := Items[I];
+    if LNode.TreeNodeInfo.Kind = TTreeNodeKind.Request then
+    begin
+      Result := LNode;
+      Break;
+    end;
+  end;
+  if Result = nil then
+  begin
+    for I := 0 to Count - 1 do
+    begin
+      LNode := Items[I];
+      if Items[I].TreeNodeInfo.Kind = TTreeNodeKind.Folder then
+      begin
+        LNode := Items[I].GetFirstRequestNode;
+        if LNode <> nil then
+        begin
+          Result := LNode;
+          Break;
+        end;
+      end;
+    end;
   end;
 end;
 
@@ -387,6 +438,7 @@ var
   LResponse: IHTTPResponse;
   I: Integer;
   LHeaderView: THeaderView;
+  LMethod: string;
 begin
   LClient := THTTPClientEx.Create;
   try
@@ -396,7 +448,8 @@ begin
       if LHeaderView.IsHeaderEnabled and not LHeaderView.HeaderValue.IsEmpty then
         LClient.Headers[LHeaderView.HeaderName] := LHeaderView.HeaderValue;
     end;
-    LResponse := LClient.Send(URLEdit.Text, THTTPMethod.Get, RequestContentMemo.Text);
+    LMethod := ActionKindComboBox.Items[ActionKindComboBox.ItemIndex];
+    LResponse := LClient.Send(URLEdit.Text, GetHTTPMethod(LMethod), RequestContentMemo.Text);
     TThread.Synchronize(nil, procedure begin HandleResponse(LResponse) end);
   finally
     LClient.Free;
@@ -404,6 +457,9 @@ begin
 end;
 
 procedure TMainView.HandleResponse(const AResponse: IHTTPResponse);
+var
+  LJSON: TJSONValue;
+  LContent: string;
 begin
   ResponseStatusCodeLabel.Text := AResponse.StatusCode.ToString;
   if (AResponse.StatusCode < 200) or (AResponse.StatusCode > 299) then
@@ -411,7 +467,11 @@ begin
   else
     ResponseStatusCodeLabel.TextSettings.FontColor := TAlphaColors.Limegreen;
   ResponseStatusTextLabel.Text := AResponse.StatusText;
-  ResponseContentMemo.Text := TJsonHelper.Tidy(AResponse.ContentAsString);
+  LContent := AResponse.ContentAsString;
+  if TJsonHelper.IsJson(LContent) then
+    ResponseContentMemo.Text := TJsonHelper.Tidy(LContent)
+  else
+    ResponseContentMemo.Text := LContent;
 end;
 
 procedure TMainView.SendActionUpdate(Sender: TObject);
@@ -553,6 +613,14 @@ begin
   Result := TTreeViewItem(LParent);
 end;
 
+procedure TMainView.RequestContentMemoChange(Sender: TObject);
+var
+  LRequest: TSlumberRequest;
+begin
+  if FindActiveSlumberRequest(LRequest) then
+    LRequest.Content := RequestContentMemo.Text;
+end;
+
 procedure TMainView.RequestNodeDescriptionChangeHandler(Sender: TObject);
 var
   LView: TRequestNodeView;
@@ -598,7 +666,7 @@ begin
   end;
   for LFolder in FProfile.Folders do
   begin
-    if LFolder.ParentID.IsEmpty then
+    if not LFolder.IsRoot and LFolder.ParentID.IsEmpty then
       AddFolderNode(FoldersTreeView, LFolder);
   end;
 end;
@@ -661,6 +729,17 @@ end;
 procedure TMainView.FormFocusChanged(Sender: TObject);
 begin
   AddItemPopupMenu.Tag := 0;
+end;
+
+procedure TMainView.FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
+begin
+  if (Shift = [ssCtrl]) and (Key = vkS) then
+  begin
+    if not string(OpenDialog.FileName).IsEmpty and TFile.Exists(OpenDialog.FileName) then
+      FProfile.SaveToFile(OpenDialog.FileName)
+    else
+      SaveProfileAction.Execute;
+  end;
 end;
 
 function TMainView.FindActiveSlumberRequest(out ARequest: TSlumberRequest): Boolean;
@@ -731,7 +810,7 @@ end;
 procedure TMainView.LoadFromProfile;
 var
   I: Integer;
-  LNode: TTreeViewItem;
+  LNode, LRequestNode: TTreeViewItem;
 begin
   FIgnoreTreeViewChange := True;
   try
@@ -740,14 +819,31 @@ begin
   finally
     FIgnoreTreeViewChange := False;
   end;
+  LRequestNode := nil;
   for I := 0 to FoldersTreeView.Count - 1 do
   begin
     LNode := FoldersTreeView.Items[I];
-    if (LNode.Level = 1) and (LNode.TreeNodeInfo.Kind = TTreeNodeKind.Folder) then
+    if LNode.TreeNodeInfo.Kind = TTreeNodeKind.Folder then
     begin
-      LNode.Expand;
-      FoldersTreeView.Selected := LNode;
-      Break;
+      LRequestNode := LNode.GetFirstRequestNode;
+      if LRequestNode <> nil then
+      begin
+        LNode.Expand;
+        FoldersTreeView.Selected := LRequestNode;
+        Break;
+      end;
+    end;
+  end;
+  if LRequestNode = nil then
+  begin
+    for I := 0 to FoldersTreeView.Count - 1 do
+    begin
+      LNode := FoldersTreeView.Items[I];
+      if (LNode.Level = 1) and (LNode.TreeNodeInfo.Kind = TTreeNodeKind.Request) then
+      begin
+        FoldersTreeView.Selected := LNode;
+        Break;
+      end;
     end;
   end;
 end;

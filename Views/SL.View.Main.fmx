@@ -9,6 +9,7 @@ object MainView: TMainView
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
+  OnKeyDown = FormKeyDown
   OnFocusChanged = FormFocusChanged
   DesignerMasterStyle = 0
   object MainLayout: TLayout
@@ -136,7 +137,7 @@ object MainView: TMainView
           Size.Width = 600.000000000000000000
           Size.Height = 806.000000000000000000
           Size.PlatformDefault = False
-          TabIndex = 1
+          TabIndex = 0
           TabOrder = 1
           TabPosition = PlatformDefault
           Sizes = (
@@ -148,7 +149,7 @@ object MainView: TMainView
             CustomIcon = <
               item
               end>
-            IsSelected = False
+            IsSelected = True
             Size.Width = 63.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
@@ -162,6 +163,7 @@ object MainView: TMainView
               DataDetectorTypes = []
               StyledSettings = [Style, FontColor]
               TextSettings.Font.Family = 'Consolas'
+              OnChange = RequestContentMemoChange
               Align = Client
               Margins.Left = 8.000000000000000000
               Margins.Top = 8.000000000000000000
@@ -179,7 +181,7 @@ object MainView: TMainView
             CustomIcon = <
               item
               end>
-            IsSelected = True
+            IsSelected = False
             Size.Width = 64.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
