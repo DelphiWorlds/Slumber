@@ -30,6 +30,7 @@ type
   public
     constructor Create(const AFolder: TSlumberFolder; const AID: string = '');
     function AddHeader(const AHeader: TSlumberHeader): Integer;
+    procedure DeleteHeader(const AHeaderIndex: Integer);
     function IndexOfHeader(const AIndex: Integer): Integer;
     property Content: string read FContent write FContent;
     property Folder: TSlumberFolder read FFolder;
@@ -100,6 +101,11 @@ begin
     FID := TSlumberProfile.GetNewID
   else
     FID := AID;
+end;
+
+procedure TSlumberRequest.DeleteHeader(const AHeaderIndex: Integer);
+begin
+  Delete(FHeaders, AHeaderIndex, 1);
 end;
 
 function TSlumberRequest.IndexOfHeader(const AIndex: Integer): Integer;
