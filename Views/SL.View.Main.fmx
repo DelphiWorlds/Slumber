@@ -3,18 +3,19 @@ object MainView: TMainView
   Top = 0
   Caption = 'Slumber'
   ClientHeight = 848
-  ClientWidth = 1462
-  Position = ScreenCenter
+  ClientWidth = 1751
+  Position = Default
   StyleBook = Resources.StyleBook
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   OnKeyDown = FormKeyDown
+  OnResize = FormResize
   OnFocusChanged = FormFocusChanged
   DesignerMasterStyle = 0
   object MainLayout: TLayout
     Align = Client
-    Size.Width = 1462.000000000000000000
+    Size.Width = 1751.000000000000000000
     Size.Height = 848.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 0
@@ -24,6 +25,7 @@ object MainView: TMainView
       Size.Height = 848.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
+      OnResized = NavigatorLayoutResized
       object NavigatorTopLayout: TLayout
         Align = Top
         Size.Width = 350.000000000000000000
@@ -121,7 +123,7 @@ object MainView: TMainView
     end
     object RequestResponseLayout: TLayout
       Align = Client
-      Size.Width = 1108.000000000000000000
+      Size.Width = 1397.000000000000000000
       Size.Height = 848.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
@@ -132,6 +134,7 @@ object MainView: TMainView
         Size.Height = 806.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 2
+        OnResized = RequestLayoutResized
         object RequestTabControl: TTabControl
           Align = Client
           Size.Width = 600.000000000000000000
@@ -208,20 +211,20 @@ object MainView: TMainView
       end
       object ResponseLayout: TLayout
         Align = Client
-        Size.Width = 504.000000000000000000
+        Size.Width = 793.000000000000000000
         Size.Height = 806.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 1
         object ResponseTabControl: TTabControl
           Align = Client
-          Size.Width = 504.000000000000000000
+          Size.Width = 793.000000000000000000
           Size.Height = 806.000000000000000000
           Size.PlatformDefault = False
           TabIndex = 0
           TabOrder = 1
           TabPosition = PlatformDefault
           Sizes = (
-            504s
+            793s
             780s)
           object ResponseContentTab: TTabItem
             CustomIcon = <
@@ -246,11 +249,11 @@ object MainView: TMainView
               Margins.Top = 4.000000000000000000
               Margins.Right = 8.000000000000000000
               Margins.Bottom = 8.000000000000000000
-              Size.Width = 488.000000000000000000
+              Size.Width = 777.000000000000000000
               Size.Height = 731.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 0
-              Viewport.Width = 484.000000000000000000
+              Viewport.Width = 773.000000000000000000
               Viewport.Height = 727.000000000000000000
             end
             object ResponseStatusLayout: TLayout
@@ -259,7 +262,7 @@ object MainView: TMainView
               Padding.Right = 8.000000000000000000
               Margins.Top = 8.000000000000000000
               Position.Y = 8.000000000000000000
-              Size.Width = 504.000000000000000000
+              Size.Width = 793.000000000000000000
               Size.Height = 29.000000000000000000
               Size.PlatformDefault = False
               TabOrder = 1
@@ -281,13 +284,24 @@ object MainView: TMainView
                 Align = Client
                 StyledSettings = [Family, FontColor]
                 Margins.Left = 12.000000000000000000
-                Size.Width = 439.000000000000000000
+                Size.Width = 631.000000000000000000
                 Size.Height = 29.000000000000000000
                 Size.PlatformDefault = False
                 TextSettings.Font.Size = 16.000000000000000000
                 TextSettings.Font.StyleExt = {00070000000000000004000000}
                 Text = 'OK'
                 TabOrder = 0
+              end
+              object ResponseWordWrapCheckBox: TCheckBox
+                Align = Right
+                IsChecked = True
+                Position.X = 688.000000000000000000
+                Size.Width = 97.000000000000000000
+                Size.Height = 29.000000000000000000
+                Size.PlatformDefault = False
+                TabOrder = 2
+                Text = 'Word wrap'
+                OnChange = ResponseWordWrapCheckBoxChange
               end
             end
           end
@@ -305,7 +319,7 @@ object MainView: TMainView
       end
       object RequestActionLayout: TLayout
         Align = Top
-        Size.Width = 1108.000000000000000000
+        Size.Width = 1397.000000000000000000
         Size.Height = 42.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
@@ -331,7 +345,7 @@ object MainView: TMainView
           Align = Client
           Margins.Left = 12.000000000000000000
           Margins.Right = 4.000000000000000000
-          Size.Width = 855.000000000000000000
+          Size.Width = 1144.000000000000000000
           Size.Height = 42.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 4
@@ -340,7 +354,7 @@ object MainView: TMainView
             Align = VertCenter
             TabOrder = 0
             Position.Y = 8.000000000000000000
-            Size.Width = 855.000000000000000000
+            Size.Width = 1144.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
             OnChange = URLEditChange
@@ -355,7 +369,7 @@ object MainView: TMainView
           Margins.Top = 6.000000000000000000
           Margins.Right = 6.000000000000000000
           Margins.Bottom = 6.000000000000000000
-          Position.X = 1014.000000000000000000
+          Position.X = 1303.000000000000000000
           Position.Y = 6.000000000000000000
           Size.Width = 88.000000000000000000
           Size.Height = 30.000000000000000000

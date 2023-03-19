@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls, FMX.Layouts, FMX.TabControl, FMX.Memo.Types, FMX.Controls.Presentation,
   FMX.ScrollBox, FMX.Memo, FMX.ListBox, FMX.Edit, System.Actions, FMX.ActnList, System.ImageList, FMX.ImgList, FMX.TreeView, FMX.Menus, FMX.Objects,
-  SL.Client, SL.Model.Profile;
+  SL.Client, SL.Model.Profile, SL.Config;
 
 type
   TMainView = class(TForm)
@@ -60,6 +60,7 @@ type
     LoadProfileMenuItem: TMenuItem;
     SaveDialog: TSaveDialog;
     OpenDialog: TOpenDialog;
+    ResponseWordWrapCheckBox: TCheckBox;
     procedure SendActionExecute(Sender: TObject);
     procedure SendActionUpdate(Sender: TObject);
     procedure DeleteItemActionUpdate(Sender: TObject);
@@ -83,10 +84,16 @@ type
     procedure URLEditChange(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
     procedure RequestContentMemoChange(Sender: TObject);
+    procedure ResponseWordWrapCheckBoxChange(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure RequestLayoutResized(Sender: TObject);
+    procedure NavigatorLayoutResized(Sender: TObject);
   private
     FClickedNode: TTreeViewItem;
+    FConfig: TSlumberConfig;
     FDefaultHeader: TSlumberHeader;
     FIgnoreTreeViewChange: Boolean;
+    FIsLoading: Boolean;
     FProfile: TSlumberProfile;
     procedure AddActionKinds;
     function AddFolderNode(const AParent: TFmxObject; const AFolder: TSlumberFolder; const AFocusView: Boolean = False): TTreeViewItem;
@@ -108,9 +115,13 @@ type
     procedure LoadFromProfile;
     procedure NewRequest(const AURL: string = '');
     procedure RequestNodeDescriptionChangeHandler(Sender: TObject);
+    procedure SaveConfig;
     procedure SendRequest;
+    procedure UpdateDimensions;
     procedure UpdateFolderNode(const ANode: TTreeViewItem; const AFolder: TSlumberFolder);
     procedure UpdateRequestNode(const ANode: TTreeViewItem; const ARequest: TSlumberRequest);
+  protected
+    procedure DoShow; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -258,7 +269,10 @@ end;
 
 constructor TMainView.Create(AOwner: TComponent);
 begin
+  FIsLoading := True;
   inherited;
+  FConfig.Load;
+  UpdateDimensions;
   FProfile := TSlumberProfile.Create;
   Resources.LoadButtonImage(cButtonImageListPlusIndex, AddItemImage.Bitmap);
   RequestTabControl.ActiveTab := RequestContentTab;
@@ -271,6 +285,30 @@ end;
 destructor TMainView.Destroy;
 begin
   FProfile.Free;
+  inherited;
+end;
+
+procedure TMainView.UpdateDimensions;
+begin
+  if FIsLoading then
+  begin
+    ResponseWordWrapCheckBox.IsChecked := FConfig.ResponseContentMemoWordWrap;
+    NavigatorLayout.Width := FConfig.NavigatorLayoutWidth;
+    RequestLayout.Width := FConfig.RequestLayoutWidth;
+    if not FConfig.MainViewDimensions.IsZero then
+    begin
+      Left := FConfig.MainViewDimensions.Left;
+      Top := FConfig.MainViewDimensions.Top;
+      Width := FConfig.MainViewDimensions.Width;
+      Height := FConfig.MainViewDimensions.Height;
+    end;
+  end;
+  FIsLoading := False;
+end;
+
+procedure TMainView.DoShow;
+begin
+  // UpdateDimensions;
   inherited;
 end;
 
@@ -621,6 +659,11 @@ begin
     LRequest.Content := RequestContentMemo.Text;
 end;
 
+procedure TMainView.RequestLayoutResized(Sender: TObject);
+begin
+  SaveConfig;
+end;
+
 procedure TMainView.RequestNodeDescriptionChangeHandler(Sender: TObject);
 var
   LView: TRequestNodeView;
@@ -629,6 +672,12 @@ begin
   LView := TRequestNodeView(Sender);
   if FProfile.FindRequest(LView.ID, LRequest) then
     LRequest.Name := LView.Description;
+end;
+
+procedure TMainView.ResponseWordWrapCheckBoxChange(Sender: TObject);
+begin
+  ResponseContentMemo.TextSettings.WordWrap := ResponseWordWrapCheckBox.IsChecked;
+  SaveConfig;
 end;
 
 function TMainView.AddRequestNode(const AParent: TFmxObject; const ARequest: TSlumberRequest; const AFocusView: Boolean = False): TTreeViewItem;
@@ -742,6 +791,11 @@ begin
   end;
 end;
 
+procedure TMainView.FormResize(Sender: TObject);
+begin
+  SaveConfig;
+end;
+
 function TMainView.FindActiveSlumberRequest(out ARequest: TSlumberRequest): Boolean;
 var
   LInfo: TTreeNodeInfo;
@@ -848,6 +902,21 @@ begin
   end;
 end;
 
+procedure TMainView.SaveConfig;
+begin
+  if not FIsLoading then
+  begin
+    FConfig.MainViewDimensions.Left := Left;
+    FConfig.MainViewDimensions.Top := Top;
+    FConfig.MainViewDimensions.Width := Width;
+    FConfig.MainViewDimensions.Height := Height;
+    FConfig.NavigatorLayoutWidth := NavigatorLayout.Width;
+    FConfig.RequestLayoutWidth := RequestLayout.Width;
+    FConfig.ResponseContentMemoWordWrap := ResponseWordWrapCheckBox.IsChecked;
+    FConfig.Save;
+  end;
+end;
+
 procedure TMainView.SaveProfileActionExecute(Sender: TObject);
 begin
   if SaveDialog.Execute then
@@ -913,7 +982,18 @@ begin
 end;
 
 procedure TMainView.HeaderViewDeleteHandler(Sender: TObject);
+var
+  LRequest: TSlumberRequest;
+  LView: THeaderView;
+  LHeaderIndex: Integer;
 begin
+  if FindActiveSlumberRequest(LRequest) then
+  begin
+    LView := THeaderView(Sender);
+    LHeaderIndex := LRequest.IndexOfHeader(LView.HeaderIndex);
+    if LHeaderIndex > -1 then
+      LRequest.DeleteHeader(LHeaderIndex);
+  end;
   Sender.Free;
   if not HasInactiveHeaderView then
     AddHeaderView(FDefaultHeader)
@@ -924,6 +1004,11 @@ end;
 function TMainView.IsNodeSelected: Boolean;
 begin
   Result := FoldersTreeView.Selected <> nil;
+end;
+
+procedure TMainView.NavigatorLayoutResized(Sender: TObject);
+begin
+  SaveConfig;
 end;
 
 procedure TMainView.NewRequest(const AURL: string = '');
