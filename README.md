@@ -60,6 +60,12 @@ The color value should be a value that matches the style being used.
 
 ## Status
 
+### 19-Mar-2023
+
+* Added "instant" saving of changes using Ctrl-S
+* Added "auto-select" of first request found when loading a profile
+* Fixed a bunch of issues
+  
 ### 04-Mar-2023
 
 * Now supports loading/saving of "profiles" (in JSON format). May not be 100% complete
