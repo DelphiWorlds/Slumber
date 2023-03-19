@@ -16,7 +16,8 @@ uses
   SL.View.FolderNode in 'Views\SL.View.FolderNode.pas' {FolderNodeView: TFrame},
   SL.View.Header in 'Views\SL.View.Header.pas' {HeaderView: TFrame},
   SL.View.Main in 'Views\SL.View.Main.pas' {MainView},
-  SL.View.RequestNode in 'Views\SL.View.RequestNode.pas' {RequestNodeView: TFrame};
+  SL.View.RequestNode in 'Views\SL.View.RequestNode.pas' {RequestNodeView: TFrame},
+  SL.Config in 'Core\SL.Config.pas';
 
 {$R *.res}
 

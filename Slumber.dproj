@@ -315,6 +315,7 @@
             <Form>RequestNodeView</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
+        <DCCReference Include="Core\SL.Config.pas"/>
         <RcCompile Include="Resources\ButtonIcons.rc">
             <Form>ButtonIcons.res</Form>
         </RcCompile>
