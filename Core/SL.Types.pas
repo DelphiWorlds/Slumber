@@ -1,5 +1,7 @@
 unit SL.Types;
 
+{$SCOPEDENUMS ON}
+
 interface
 
 type
