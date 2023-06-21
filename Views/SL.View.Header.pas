@@ -5,12 +5,11 @@ interface
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
   FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls, FMX.Controls.Presentation, FMX.Edit, FMX.ListBox, FMX.Layouts,
-  FMX.Objects;
+  FMX.Objects, FMX.ComboEdit;
 
 type
   THeaderView = class(TFrame)
     ActionButton: TSpeedButton;
-    HeaderKindComboBox: TComboBox;
     HeaderValueEdit: TEdit;
     DeleteButton: TSpeedButton;
     EnabledCheckBox: TCheckBox;
@@ -19,14 +18,18 @@ type
     NewHeaderLabel: TLabel;
     ActionImage: TImage;
     DeleteImage: TImage;
+    HeaderKindComboEdit: TComboEdit;
     procedure HeaderValueEditChangeTracking(Sender: TObject);
     procedure DeleteButtonClick(Sender: TObject);
     procedure ActionButtonClick(Sender: TObject);
-    procedure HeaderKindComboBoxClosePopup(Sender: TObject);
-    procedure HeaderKindComboBoxPopup(Sender: TObject);
+    procedure HeaderKindComboEditClosePopup(Sender: TObject);
+    procedure HeaderKindComboEditPopup(Sender: TObject);
+    procedure HeaderKindComboEditChangeTracking(Sender: TObject);
+    procedure HeaderKindComboEditExit(Sender: TObject);
   private
     FIsActive: Boolean;
     FHeaderIndex: Integer;
+    FHeaderKindChanged: Boolean;
     FHeaderKindIndex: Integer;
     FOnActive: TNotifyEvent;
     FOnChanged: TNotifyEvent;
@@ -70,8 +73,8 @@ constructor THeaderView.Create(AOwner: TComponent);
 begin
   inherited;
   Name := '';
-  HeaderKindComboBox.Items.AddStrings(cHeaderKindNames);
-  HeaderKindComboBox.ItemIndex := 0;
+  HeaderKindComboEdit.Items.AddStrings(cHeaderKindNames);
+  HeaderKindComboEdit.ItemIndex := 0;
   Resources.LoadButtonImage(cButtonImageDeleteIndex, DeleteImage.Bitmap);
   SetIsActive(False);
 end;
@@ -96,6 +99,7 @@ end;
 
 procedure THeaderView.DoChanged;
 begin
+  FHeaderKindChanged := False;
   if Assigned(FOnChanged) then
     FOnChanged(Self);
 end;
@@ -131,9 +135,7 @@ end;
 
 function THeaderView.GetHeaderName: string;
 begin
-  Result := '';
-  if HeaderKindComboBox.ItemIndex > -1 then
-    Result := HeaderKindComboBox.Items[HeaderKindComboBox.ItemIndex];
+  Result := HeaderKindComboEdit.Text;
 end;
 
 function THeaderView.GetHeaderValue: string;
@@ -141,18 +143,29 @@ begin
   Result := HeaderValueEdit.Text;
 end;
 
-procedure THeaderView.HeaderKindComboBoxClosePopup(Sender: TObject);
+procedure THeaderView.HeaderKindComboEditChangeTracking(Sender: TObject);
 begin
-  if HeaderKindComboBox.ItemIndex <> FHeaderKindIndex then
+  FHeaderKindChanged := True;
+end;
+
+procedure THeaderView.HeaderKindComboEditClosePopup(Sender: TObject);
+begin
+  if HeaderKindComboEdit.ItemIndex <> FHeaderKindIndex then
   begin
     FocusHeaderValueEdit;
     DoChanged;
   end;
 end;
 
-procedure THeaderView.HeaderKindComboBoxPopup(Sender: TObject);
+procedure THeaderView.HeaderKindComboEditExit(Sender: TObject);
 begin
-  FHeaderKindIndex := HeaderKindComboBox.ItemIndex;
+  if FHeaderKindChanged then
+    DoChanged;
+end;
+
+procedure THeaderView.HeaderKindComboEditPopup(Sender: TObject);
+begin
+  FHeaderKindIndex := HeaderKindComboEdit.ItemIndex;
 end;
 
 procedure THeaderView.HeaderValueEditChangeTracking(Sender: TObject);
@@ -167,15 +180,9 @@ begin
 end;
 
 procedure THeaderView.SetHeaderName(const Value: string);
-var
-  LIndex: Integer;
 begin
-  LIndex := HeaderKindComboBox.Items.IndexOf(Value);
-  if LIndex > -1 then
-  begin
-    HeaderKindComboBox.ItemIndex := LIndex;
-    SetIsActive(True);
-  end;
+  HeaderKindComboEdit.Text := Value;
+  FHeaderKindChanged := False;
 end;
 
 procedure THeaderView.SetHeaderValue(const Value: string);
@@ -201,7 +208,7 @@ begin
     Resources.LoadButtonImage(cButtonImageGrabIndex, ActionImage.Bitmap)
   else
     Resources.LoadButtonImage(cButtonImageCogIndex, ActionImage.Bitmap);
-  HeaderKindComboBox.Visible := FIsActive;
+  HeaderKindComboEdit.Visible := FIsActive;
   HeaderValueEdit.Visible := FIsActive;
   EnabledCheckBox.Visible := FIsActive;
   EnabledCheckBox.IsChecked := FIsActive;

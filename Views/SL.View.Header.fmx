@@ -73,16 +73,6 @@ object HeaderView: THeaderView
     Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 3
-    object HeaderKindComboBox: TComboBox
-      Align = VertCenter
-      Position.Y = 7.000000000000000000
-      Size.Width = 200.000000000000000000
-      Size.Height = 26.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 0
-      OnClosePopup = HeaderKindComboBoxClosePopup
-      OnPopup = HeaderKindComboBoxPopup
-    end
     object NewHeaderLabel: TLabel
       Align = VertCenter
       Opacity = 0.699999988079071100
@@ -93,6 +83,21 @@ object HeaderView: THeaderView
       Text = 'New Header'
       Visible = False
       TabOrder = 1
+    end
+    object HeaderKindComboEdit: TComboEdit
+      Touch.InteractiveGestures = [LongTap, DoubleTap]
+      Align = VertCenter
+      TabOrder = 0
+      Cursor = crDefault
+      ItemIndex = -1
+      Position.Y = 7.000000000000000000
+      Size.Width = 200.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      OnChangeTracking = HeaderKindComboEditChangeTracking
+      OnClosePopup = HeaderKindComboEditClosePopup
+      OnPopup = HeaderKindComboEditPopup
+      OnExit = HeaderKindComboEditExit
     end
   end
   object HeaderValueLayout: TLayout
