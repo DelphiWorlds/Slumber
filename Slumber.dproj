@@ -5,7 +5,7 @@
         <FrameworkType>FMX</FrameworkType>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <Platform Condition="'$(Platform)'==''">OSX64</Platform>
         <TargetedPlatforms>693267</TargetedPlatforms>
         <AppType>Application</AppType>
         <MainSource>Slumber.dpr</MainSource>
@@ -113,7 +113,7 @@
         <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
         <Icns_MainIcns>$(BDS)\bin\delphi_PROJECTICNS.icns</Icns_MainIcns>
         <SanitizedProjectName>Slumber</SanitizedProjectName>
-        <DCC_UnitSearchPath>$(Kastri)\API;$(Kastri)\Core;$(Kastri)\Include;$(SVG)\Source;$(SVG)\Svg;$(SVG)\Image32;$(SVG)\Image32\source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>$(Kastri)\API;$(Kastri)\Core;$(Kastri)\Include;$(SVG)\Source;$(SVG)\Svg;$(SVG)\Image32;$(SVG)\Image32\source;$(Skia);$(Skia)\FMX;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <PF_SandBox>3rd Party Mac Developer Installer: David Nottage (LDM7R2GDFK)</PF_SandBox>
         <PF_DevSandBox>Apple Development: David Nottage (B27694QHFQ)</PF_DevSandBox>
     </PropertyGroup>
