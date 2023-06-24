@@ -30,7 +30,8 @@ Note: Although there is a dependency on SVGIconImageList, the project creates th
 The Slumber project options uses a search path based on environment variable user overrides, which appear as: `$(Variable)` where `Variable` is the name of the relevant variable in the `User Overrides` section of the IDE options (Tools|Options, IDE > Environment Variables). Each of the following variables are used:
 
 * `Kastri` - needs to point to an instance of the Kastri repo
-* `SVG` - needs to point to an instance of the SVGIconImageList repo. 
+* `SVG` - needs to point to an instance of the SVGIconImageList repo.
+* `Skia` - needs to point to the `Source` folder of [Skia 4.1.1](https://github.com/skia4delphi/skia4delphi/releases/tag/v4.1.1) (the latest version that SVGIconImageList supports). **This is required only if compiling for macOS.** 
   
 **NOTE**: This project uses a *customised version* of the `SVGIconImageList.inc` file, which is located in the root of the project
 
@@ -59,6 +60,13 @@ The color value should be a value that matches the style being used.
 * Implement collections like Postman and Insomnia etc
 
 ## Status
+
+### 24-Jun-2023
+
+* Changed header kind combo to allow custom headers
+* Added Skia search paths for macOS
+
+**NOTE: I am currently unable to make the images appear on macOS**. Any help with this would be appreciated. 
 
 ### 19-Mar-2023
 
