@@ -5,7 +5,6 @@ object MainView: TMainView
   ClientHeight = 848
   ClientWidth = 1751
   Position = Default
-  StyleBook = Resources.StyleBook
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
@@ -140,7 +139,7 @@ object MainView: TMainView
           Size.Width = 600.000000000000000000
           Size.Height = 806.000000000000000000
           Size.PlatformDefault = False
-          TabIndex = 0
+          TabIndex = 1
           TabOrder = 1
           TabPosition = PlatformDefault
           Sizes = (
@@ -152,7 +151,7 @@ object MainView: TMainView
             CustomIcon = <
               item
               end>
-            IsSelected = True
+            IsSelected = False
             Size.Width = 63.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
@@ -184,7 +183,7 @@ object MainView: TMainView
             CustomIcon = <
               item
               end>
-            IsSelected = False
+            IsSelected = True
             Size.Width = 64.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
@@ -224,6 +223,8 @@ object MainView: TMainView
           TabOrder = 1
           TabPosition = PlatformDefault
           Sizes = (
+            793s
+            780s
             793s
             780s)
           object ResponseContentTab: TTabItem
@@ -305,6 +306,37 @@ object MainView: TMainView
               end
             end
           end
+          object ResponseHeadersTab: TTabItem
+            CustomIcon = <
+              item
+              end>
+            IsSelected = False
+            Size.Width = 64.000000000000000000
+            Size.Height = 26.000000000000000000
+            Size.PlatformDefault = False
+            StyleLookup = ''
+            TabOrder = 0
+            Text = 'Headers'
+            ExplicitSize.cx = 64.000000000000000000
+            ExplicitSize.cy = 26.000000000000000000
+            object ResponseHeadersMemo: TMemo
+              Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+              DataDetectorTypes = []
+              StyledSettings = [Style, FontColor]
+              TextSettings.Font.Family = 'Consolas'
+              Align = Client
+              Margins.Left = 8.000000000000000000
+              Margins.Top = 4.000000000000000000
+              Margins.Right = 8.000000000000000000
+              Margins.Bottom = 8.000000000000000000
+              Size.Width = 777.000000000000000000
+              Size.Height = 768.000000000000000000
+              Size.PlatformDefault = False
+              TabOrder = 0
+              Viewport.Width = 773.000000000000000000
+              Viewport.Height = 764.000000000000000000
+            end
+          end
         end
       end
       object ResponseSplitter: TSplitter
@@ -358,6 +390,7 @@ object MainView: TMainView
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
             OnChange = URLEditChange
+            OnKeyDown = URLEditKeyDown
           end
         end
         object SendButton: TButton

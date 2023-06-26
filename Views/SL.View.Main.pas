@@ -61,6 +61,8 @@ type
     SaveDialog: TSaveDialog;
     OpenDialog: TOpenDialog;
     ResponseWordWrapCheckBox: TCheckBox;
+    ResponseHeadersTab: TTabItem;
+    ResponseHeadersMemo: TMemo;
     procedure SendActionExecute(Sender: TObject);
     procedure SendActionUpdate(Sender: TObject);
     procedure DeleteItemActionUpdate(Sender: TObject);
@@ -88,6 +90,7 @@ type
     procedure FormResize(Sender: TObject);
     procedure RequestLayoutResized(Sender: TObject);
     procedure NavigatorLayoutResized(Sender: TObject);
+    procedure URLEditKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
   private
     FClickedNode: TTreeViewItem;
     FConfig: TSlumberConfig;
@@ -135,7 +138,7 @@ implementation
 {$R *.fmx}
 
 uses
-  System.IOUtils, System.JSON,
+  System.IOUtils, System.JSON, System.Net.URLClient,
   FMX.Platform,
   DW.JSON, DW.IOUtils.Helpers,
   SL.View.Header, SL.Consts, SL.Types, SL.Resources, SL.Storage.Profile, SL.View.FolderNode, SL.View.RequestNode;
@@ -195,7 +198,6 @@ function TTreeViewItemHelper.GetFirstRequestNode: TTreeViewItem;
 var
   I: Integer;
   LNode: TTreeViewItem;
-  LClass: string;
 begin
   Result := nil;
   for I := 0 to Count - 1 do
@@ -211,7 +213,6 @@ begin
   begin
     for I := 0 to Count - 1 do
     begin
-      LNode := Items[I];
       if Items[I].TreeNodeInfo.Kind = TTreeNodeKind.Folder then
       begin
         LNode := Items[I].GetFirstRequestNode;
@@ -271,14 +272,21 @@ constructor TMainView.Create(AOwner: TComponent);
 begin
   FIsLoading := True;
   inherited;
+  Resources := TResources.Create(Self);
+  StyleBook := Resources.StyleBook;
   FConfig.Load;
   UpdateDimensions;
   FProfile := TSlumberProfile.Create;
   Resources.LoadButtonImage(cButtonImageListPlusIndex, AddItemImage.Bitmap);
   RequestTabControl.ActiveTab := RequestContentTab;
+  ResponseTabControl.ActiveTab := ResponseContentTab;
   AddActionKinds;
   FDefaultHeader := Default(TSlumberHeader);
   FDefaultHeader.Index := -1;
+  {$IF Defined(MACOS)}
+  ResponseContentMemo.TextSettings.Font.Family := 'Monaco';
+  ResponseHeadersMemo.TextSettings.Font.Family := ResponseContentMemo.TextSettings.Font.Family;
+  {$ENDIF}
   NewRequest;
 end;
 
@@ -334,7 +342,6 @@ end;
 procedure TMainView.AddFolderActionExecute(Sender: TObject);
 var
   LFolder, LParentFolder: TSlumberFolder;
-  LInfo: TTreeNodeInfo;
   LParentNode: TTreeViewItem;
 begin
   LParentNode := nil;
@@ -496,8 +503,8 @@ end;
 
 procedure TMainView.HandleResponse(const AResponse: IHTTPResponse);
 var
-  LJSON: TJSONValue;
   LContent: string;
+  LHeader: TNameValuePair;
 begin
   ResponseStatusCodeLabel.Text := AResponse.StatusCode.ToString;
   if (AResponse.StatusCode < 200) or (AResponse.StatusCode > 299) then
@@ -510,12 +517,16 @@ begin
     ResponseContentMemo.Text := TJsonHelper.Tidy(LContent)
   else
     ResponseContentMemo.Text := LContent;
+  ResponseHeadersMemo.Lines.Clear;
+  for LHeader in AResponse.Headers do
+    ResponseHeadersMemo.Lines.Add(Format('%s: %s', [LHeader.Name, LHeader.Value]));
 end;
 
 procedure TMainView.SendActionUpdate(Sender: TObject);
 begin
   // Can send if:
   //   Valid URL ("turn it red" if invalid)
+  SendAction.Enabled := not URLEdit.Text.Trim.IsEmpty;
 end;
 
 procedure TMainView.ActionKindComboBoxClosePopup(Sender: TObject);
@@ -568,6 +579,16 @@ var
 begin
   if FindActiveSlumberRequest(LRequest) then
     LRequest.URL := URLEdit.Text;
+end;
+
+procedure TMainView.URLEditKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
+begin
+  if Key = vkReturn then
+  begin
+    Key := 0;
+    KeyChar := #0;
+    SendAction.Execute;
+  end;
 end;
 
 procedure TMainView.FolderNodeDescriptionChangeHandler(Sender: TObject);
