@@ -18,10 +18,10 @@ If you wish to join, please post in the discussions section or in the Delphi Wor
 
 ## Dependencies
 
-* [SVGIconImageList](https://github.com/EtheaDev/SVGIconImageList)
+* [Skia v6.0.0](https://github.com/skia4delphi/skia4delphi/releases/tag/v6.0.0-beta2)
 * [Kastri](https://github.com/DelphiWorlds/Kastri)
 
-Note: Although there is a dependency on SVGIconImageList, the project creates the required classes at run-time, so there is no need to install the SVGIconImageList components. See also [Project search paths](#project-search-paths) regarding the include file.
+Note: For Windows builds (Win32 or Win64), you will need to ensure that `sk4d.dll` is in the Windows library path. The dll for the respective platform is under the `Lib` folder.
 
 ## Configuration
 
@@ -30,10 +30,7 @@ Note: Although there is a dependency on SVGIconImageList, the project creates th
 The Slumber project options uses a search path based on environment variable user overrides, which appear as: `$(Variable)` where `Variable` is the name of the relevant variable in the `User Overrides` section of the IDE options (Tools|Options, IDE > Environment Variables). Each of the following variables are used:
 
 * `Kastri` - needs to point to an instance of the Kastri repo
-* `SVG` - needs to point to an instance of the SVGIconImageList repo.
-* `Skia` - needs to point to the `Source` folder of [Skia 4.1.1](https://github.com/skia4delphi/skia4delphi/releases/tag/v4.1.1) (the latest version that SVGIconImageList supports). **This is required only if compiling for macOS.** 
-  
-**NOTE**: This project uses a *customised version* of the `SVGIconImageList.inc` file, which is located in the root of the project
+* `Skia` - needs to point to the `Source` folder of [Skia](https://github.com/skia4delphi/skia4delphi/releases/tag/v6.0.0-beta2)
 
 ### Styles
 
@@ -61,12 +58,20 @@ The color value should be a value that matches the style being used.
 
 ## Status
 
+### 26-Jun-2023
+
+* Removed dependency on SVGIconImageList, however the image loading is now based on [Skia v6.0.0](https://github.com/skia4delphi/skia4delphi/releases/tag/v6.0.0-beta2)
+* Pressing enter in the URL edit now sends the request
+* Added Headers to the response area
+
+The switch to using Skia (and no Img32 code from SVGIconImageList) means that the Windows version is now dependent on the Skia DLLs (Win32 or Win64). These are in the `Lib` folder.
+
 ### 24-Jun-2023
 
 * Changed header kind combo to allow custom headers
 * Added Skia search paths for macOS
 
-**NOTE: I am currently unable to make the images appear on macOS**. Any help with this would be appreciated. 
+~~**NOTE: I am currently unable to make the images appear on macOS**~~ This has been fixed in the 26-Jun-2023 changes
 
 ### 19-Mar-2023
 
