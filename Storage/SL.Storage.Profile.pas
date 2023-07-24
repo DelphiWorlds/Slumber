@@ -210,7 +210,7 @@ var
 begin
   if TFile.Exists(AFileName) then
   begin
-    LJSON := TJSONObject.ParseJSONValue(TFile.ReadAllText(AFileName));
+    LJSON := TJSONObject.ParseJSONValue(TFile.ReadAllText(AFileName, TEncoding.UTF8));
     if LJSON <> nil then
     try
       if LJSON.TryGetValue('Folders', LFolders) then
@@ -228,7 +228,7 @@ begin
   LJSON := TJSONObject.Create;
   try
     LJSON.AddPair('Folders', GetFoldersJSONValue);
-    TFile.WriteAllText(AFileName, TJsonHelper.Tidy(LJSON));
+    TFile.WriteAllText(AFileName, TJsonHelper.Tidy(LJSON), TEncoding.UTF8);
   finally
     LJSON.Free;
   end;
