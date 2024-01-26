@@ -19,6 +19,9 @@ type
     ActionImage: TImage;
     DeleteImage: TImage;
     HeaderKindComboEdit: TComboEdit;
+    ClearHeaderValueEditButton: TClearEditButton;
+    SuggestionListBox: TListBox;
+    SuggestionTimer: TTimer;
     procedure HeaderValueEditChangeTracking(Sender: TObject);
     procedure DeleteButtonClick(Sender: TObject);
     procedure ActionButtonClick(Sender: TObject);
@@ -26,6 +29,11 @@ type
     procedure HeaderKindComboEditPopup(Sender: TObject);
     procedure HeaderKindComboEditChangeTracking(Sender: TObject);
     procedure HeaderKindComboEditExit(Sender: TObject);
+    procedure ClearHeaderValueEditButtonClick(Sender: TObject);
+    procedure SuggestionTimerTimer(Sender: TObject);
+    procedure HeaderValueEditKeyDown(Sender: TObject; var Key: Word; var KeyChar: WideChar; Shift: TShiftState);
+    procedure SuggestionListBoxClick(Sender: TObject);
+    procedure SuggestionListBoxKeyDown(Sender: TObject; var Key: Word; var KeyChar: WideChar; Shift: TShiftState);
   private
     FIsActive: Boolean;
     FHeaderIndex: Integer;
@@ -37,16 +45,19 @@ type
     procedure DoActive;
     procedure DoChanged;
     procedure DoDelete;
+    procedure FilterSuggestions;
     procedure FocusHeaderValueEdit;
     function GetHeaderIndex: Integer;
     function GetHeaderName: string;
     function GetHeaderValue: string;
     function GetIsHeaderEnabled: Boolean;
+    function SelectSuggestion: Boolean;
     procedure SetIsActive(const Value: Boolean);
     procedure SetHeaderIndex(const Value: Integer);
     procedure SetHeaderName(const Value: string);
     procedure SetHeaderValue(const Value: string);
     procedure SetIsHeaderEnabled(const Value: Boolean);
+    procedure ShowSuggestions;
   public
     constructor Create(AOwner: TComponent); override;
     function GainFocus: Boolean;
@@ -65,7 +76,11 @@ implementation
 {$R *.fmx}
 
 uses
-  SL.Consts, SL.Resources;
+  System.StrUtils,
+  SL.Consts, SL.Resources, SL.Core;
+
+type
+  TOpenControl = class(TControl);
 
 { THeaderView }
 
@@ -73,7 +88,8 @@ constructor THeaderView.Create(AOwner: TComponent);
 begin
   inherited;
   Name := '';
-  HeaderKindComboEdit.Items.AddStrings(cHeaderKindNames);
+  HeaderValues.Load;
+  HeaderKindComboEdit.Items.AddStrings(HeaderValues.GetKinds);
   HeaderKindComboEdit.ItemIndex := 0;
   Resources.LoadButtonImage(cButtonImageDeleteIndex, DeleteImage.Bitmap);
   SetIsActive(False);
@@ -82,6 +98,13 @@ end;
 function THeaderView.GetIsHeaderEnabled: Boolean;
 begin
   Result := EnabledCheckBox.IsChecked;
+end;
+
+procedure THeaderView.ClearHeaderValueEditButtonClick(Sender: TObject);
+begin
+  HeaderValueEdit.Text := '';
+  SuggestionTimer.Enabled := False;
+  SuggestionListBox.Visible := False;
 end;
 
 procedure THeaderView.DeleteButtonClick(Sender: TObject);
@@ -152,6 +175,9 @@ procedure THeaderView.HeaderKindComboEditClosePopup(Sender: TObject);
 begin
   if HeaderKindComboEdit.ItemIndex <> FHeaderKindIndex then
   begin
+    HeaderValueEdit.Text := '';
+    SuggestionTimer.Enabled := False;
+    SuggestionListBox.Visible := False;
     FocusHeaderValueEdit;
     DoChanged;
   end;
@@ -171,6 +197,102 @@ end;
 procedure THeaderView.HeaderValueEditChangeTracking(Sender: TObject);
 begin
   DoChanged;
+  SuggestionTimer.Enabled := True;
+end;
+
+procedure THeaderView.HeaderValueEditKeyDown(Sender: TObject; var Key: Word; var KeyChar: WideChar; Shift: TShiftState);
+begin
+  case Key of
+    vkReturn:
+    begin
+      if SelectSuggestion then
+      begin
+        Key := 0;
+        KeyChar := #0;
+      end;
+    end;
+    vkUp, vkDown:
+    begin
+      if (Key = vkDown) and not SuggestionListBox.Visible then
+        ShowSuggestions
+      else
+        TOpenControl(SuggestionListBox).KeyDown(Key, KeyChar, Shift);
+    end;
+    vkEscape:
+      SuggestionListBox.Visible := False;
+  end;
+end;
+
+procedure THeaderView.FilterSuggestions;
+var
+  LMatches, LValues: TArray<string>;
+  LSelectedValue, LValue: string;
+  LIndex: Integer;
+begin
+  LMatches := HeaderValues.GetMatches(HeaderKindComboEdit.Text, HeaderValueEdit.Text);
+  LSelectedValue := '';
+  if SuggestionListBox.ItemIndex > 0 then
+    LSelectedValue := SuggestionListBox.Items[SuggestionListBox.ItemIndex];
+  SuggestionListBox.Items.BeginUpdate;
+  try
+    SuggestionListBox.Items.Clear;
+    SuggestionListBox.Items.AddStrings(LMatches);
+    LIndex := SuggestionListBox.Items.IndexOf(LSelectedValue);
+    if LIndex > -1 then
+      SuggestionListBox.ItemIndex := LIndex
+    else if SuggestionListBox.Items.Count > 0 then
+      SuggestionListBox.ItemIndex := 0;
+  finally
+    SuggestionListBox.Items.EndUpdate;
+  end;
+end;
+
+procedure THeaderView.ShowSuggestions;
+begin
+  FilterSuggestions;
+  if SuggestionListBox.Items.Count > 0 then
+  begin
+    SuggestionListBox.Position.X := HeaderValueEdit.Position.X;
+    SuggestionListBox.Position.Y := HeaderValueEdit.BoundsRect.Bottom + 2;
+    SuggestionListBox.Width := HeaderValueEdit.Width;
+    SuggestionListBox.Visible := True;
+  end
+  else
+    SuggestionListBox.Visible := False;
+end;
+
+procedure THeaderView.SuggestionListBoxClick(Sender: TObject);
+begin
+  SelectSuggestion;
+end;
+
+procedure THeaderView.SuggestionListBoxKeyDown(Sender: TObject; var Key: Word; var KeyChar: WideChar; Shift: TShiftState);
+begin
+  if (Key = vkReturn) and SelectSuggestion then
+  begin
+    Key := 0;
+    KeyChar := #0;
+  end;
+end;
+
+procedure THeaderView.SuggestionTimerTimer(Sender: TObject);
+begin
+  SuggestionTimer.Enabled := False;
+  ShowSuggestions;
+end;
+
+function THeaderView.SelectSuggestion: Boolean;
+begin
+  Result := False;
+  if SuggestionListBox.Visible and (SuggestionListBox.ItemIndex > -1) then
+  begin
+    HeaderValueEdit.Text := SuggestionListBox.Items[SuggestionListBox.ItemIndex];
+    HeaderValueEdit.SelStart := Length(HeaderValueEdit.Text);
+    SuggestionTimer.Enabled := False;
+    SuggestionListBox.Visible := False;
+    HeaderValueEdit.SetFocus;
+    Result := True;
+  end;
 end;
 
 procedure THeaderView.SetHeaderIndex(const Value: Integer);

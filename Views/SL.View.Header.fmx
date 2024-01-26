@@ -14,6 +14,7 @@ object HeaderView: THeaderView
     Size.Width = 37.000000000000000000
     Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
+    TextSettings.Trimming = None
     OnClick = ActionButtonClick
     object ActionImage: TImage
       MultiResBitmap = <
@@ -38,6 +39,7 @@ object HeaderView: THeaderView
     Size.Width = 37.000000000000000000
     Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
+    TextSettings.Trimming = None
     OnClick = DeleteButtonClick
     object DeleteImage: TImage
       MultiResBitmap = <
@@ -80,6 +82,7 @@ object HeaderView: THeaderView
       Size.Width = 244.000000000000000000
       Size.Height = 17.000000000000000000
       Size.PlatformDefault = False
+      TextSettings.Trimming = None
       Text = 'New Header'
       Visible = False
       TabOrder = 1
@@ -89,6 +92,7 @@ object HeaderView: THeaderView
       Align = VertCenter
       TabOrder = 0
       Cursor = crDefault
+      ItemHeight = 19.000000000000000000
       ItemIndex = -1
       Position.Y = 7.000000000000000000
       Size.Width = 200.000000000000000000
@@ -117,6 +121,40 @@ object HeaderView: THeaderView
       Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       OnChangeTracking = HeaderValueEditChangeTracking
+      OnKeyDown = HeaderValueEditKeyDown
+      object ClearHeaderValueEditButton: TClearEditButton
+        Touch.InteractiveGestures = [LongTap]
+        CanFocus = False
+        Cursor = crArrow
+        TextSettings.Trimming = None
+        Size.Width = 28.000000000000000000
+        Size.Height = 22.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        OnClick = ClearHeaderValueEditButtonClick
+      end
     end
+    object SuggestionListBox: TListBox
+      Position.X = 80.000000000000000000
+      Position.Y = 40.000000000000000000
+      TabOrder = 1
+      Visible = False
+      OnClick = SuggestionListBoxClick
+      DisableFocusEffect = True
+      DefaultItemStyles.ItemStyle = ''
+      DefaultItemStyles.GroupHeaderStyle = ''
+      DefaultItemStyles.GroupFooterStyle = ''
+      Sorted = True
+      OnKeyDown = SuggestionListBoxKeyDown
+      Viewport.Width = 196.000000000000000000
+      Viewport.Height = 196.000000000000000000
+    end
+  end
+  object SuggestionTimer: TTimer
+    Enabled = False
+    Interval = 250
+    OnTimer = SuggestionTimerTimer
+    Left = 549
+    Top = 7
   end
 end
