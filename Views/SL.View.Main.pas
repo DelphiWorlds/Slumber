@@ -63,6 +63,12 @@ type
     ResponseWordWrapCheckBox: TCheckBox;
     ResponseHeadersTab: TTabItem;
     ResponseHeadersMemo: TMemo;
+    SaveProfileAsAction: TAction;
+    SaveProfileAsMenuItem: TMenuItem;
+    NewProfileAction: TAction;
+    NewProfileMenuItem: TMenuItem;
+    URLParamsTab: TTabItem;
+    GlobalHeadersVertScrollBox: TVertScrollBox;
     procedure SendActionExecute(Sender: TObject);
     procedure SendActionUpdate(Sender: TObject);
     procedure DeleteItemActionUpdate(Sender: TObject);
@@ -91,7 +97,11 @@ type
     procedure RequestLayoutResized(Sender: TObject);
     procedure NavigatorLayoutResized(Sender: TObject);
     procedure URLEditKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
+    procedure SaveProfileAsActionExecute(Sender: TObject);
+    procedure NewProfileActionExecute(Sender: TObject);
+    procedure URLEditChangeTracking(Sender: TObject);
   private
+    FCaption: string;
     FClickedNode: TTreeViewItem;
     FConfig: TSlumberConfig;
     FDefaultHeader: TSlumberHeader;
@@ -109,6 +119,7 @@ type
     procedure FocusHeaderView;
     procedure FolderNodeDescriptionChangeHandler(Sender: TObject);
     procedure HandleResponse(const AResponse: IHTTPResponse);
+    procedure HandleException(const AException: Exception);
     function HasClickedNode: Boolean;
     function HasInactiveHeaderView: Boolean;
     procedure HeaderViewActiveHandler(Sender: TObject);
@@ -120,9 +131,11 @@ type
     procedure RequestNodeDescriptionChangeHandler(Sender: TObject);
     procedure SaveConfig;
     procedure SendRequest;
+    procedure UpdateCaption;
     procedure UpdateDimensions;
     procedure UpdateFolderNode(const ANode: TTreeViewItem; const AFolder: TSlumberFolder);
     procedure UpdateRequestNode(const ANode: TTreeViewItem; const ARequest: TSlumberRequest);
+    procedure UpdateURLParams;
   protected
     procedure DoShow; override;
   public
@@ -272,6 +285,7 @@ constructor TMainView.Create(AOwner: TComponent);
 begin
   FIsLoading := True;
   inherited;
+  FCaption := Caption;
   Resources := TResources.Create(Self);
   StyleBook := Resources.StyleBook;
   FConfig.Load;
@@ -287,13 +301,39 @@ begin
   ResponseContentMemo.TextSettings.Font.Family := 'Monaco';
   ResponseHeadersMemo.TextSettings.Font.Family := ResponseContentMemo.TextSettings.Font.Family;
   {$ENDIF}
-  NewRequest;
+  if TFile.Exists(FConfig.ProfileFileName) then
+  begin
+    FProfile.LoadFromFile(FConfig.ProfileFileName);
+    LoadFromProfile;
+  end
+  else
+  begin
+    FConfig.ProfileFileName := '';
+    UpdateCaption;
+    NewRequest;
+  end;
 end;
 
 destructor TMainView.Destroy;
 begin
   FProfile.Free;
   inherited;
+end;
+
+procedure TMainView.NewProfileActionExecute(Sender: TObject);
+begin
+  FConfig.ProfileFileName := '';
+  FProfile.Clear;
+  FConfig.Save;
+  LoadFromProfile;
+end;
+
+procedure TMainView.UpdateCaption;
+begin
+  if not FConfig.ProfileFileName.IsEmpty then
+    Caption := Format('%s - %s', [FCaption, FConfig.ProfileFileName])
+  else
+    Caption := FCaption;
 end;
 
 procedure TMainView.UpdateDimensions;
@@ -464,11 +504,6 @@ begin
   EditItemAction.Enabled := LInfo.Kind in [TTreeNodeKind.Folder, TTreeNodeKind.Request];
 end;
 
-procedure TMainView.SaveProfileActionUpdate(Sender: TObject);
-begin
-  SaveProfileAction.Enabled := not FProfile.IsEmpty;
-end;
-
 procedure TMainView.SendActionExecute(Sender: TObject);
 begin
   ResponseStatusCodeLabel.Text := '';
@@ -494,11 +529,25 @@ begin
         LClient.Headers[LHeaderView.HeaderName] := LHeaderView.HeaderValue;
     end;
     LMethod := ActionKindComboBox.Items[ActionKindComboBox.ItemIndex];
-    LResponse := LClient.Send(URLEdit.Text, GetHTTPMethod(LMethod), RequestContentMemo.Text);
-    TThread.Synchronize(nil, procedure begin HandleResponse(LResponse) end);
+    try
+      LResponse := LClient.Send(URLEdit.Text, GetHTTPMethod(LMethod), RequestContentMemo.Text);
+      TThread.Synchronize(nil, procedure begin HandleResponse(LResponse) end);
+    except
+      on E: Exception do
+        TThread.Synchronize(nil, procedure begin HandleException(E) end);
+    end;
   finally
     LClient.Free;
   end;
+end;
+
+procedure TMainView.HandleException(const AException: Exception);
+begin
+  ResponseHeadersMemo.Lines.Clear;
+  ResponseContentMemo.Lines.Clear;
+  ResponseStatusCodeLabel.Text := '500';
+  ResponseStatusCodeLabel.TextSettings.FontColor := TAlphaColors.Red;
+  ResponseStatusTextLabel.Text := Format('%s: %s', [AException.ClassName, AException.Message]);
 end;
 
 procedure TMainView.HandleResponse(const AResponse: IHTTPResponse);
@@ -573,12 +622,22 @@ begin
   end;
 end;
 
+procedure TMainView.UpdateURLParams;
+begin
+  //
+end;
+
 procedure TMainView.URLEditChange(Sender: TObject);
 var
   LRequest: TSlumberRequest;
 begin
   if FindActiveSlumberRequest(LRequest) then
     LRequest.URL := URLEdit.Text;
+end;
+
+procedure TMainView.URLEditChangeTracking(Sender: TObject);
+begin
+  UpdateURLParams;
 end;
 
 procedure TMainView.URLEditKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
@@ -877,7 +936,9 @@ procedure TMainView.LoadProfileActionExecute(Sender: TObject);
 begin
   if OpenDialog.Execute then
   begin
-    FProfile.LoadFromFile(OpenDialog.FileName);
+    FConfig.ProfileFileName := OpenDialog.FileName;
+    FConfig.Save;
+    FProfile.LoadFromFile(FConfig.ProfileFileName);
     LoadFromProfile;
   end;
 end;
@@ -887,6 +948,13 @@ var
   I: Integer;
   LNode, LRequestNode: TTreeViewItem;
 begin
+  UpdateCaption;
+  RequestContentMemo.Lines.Clear;
+  ResponseContentMemo.Lines.Clear;
+  ResponseHeadersMemo.Lines.Clear;
+  RequestHeadersVertScrollBox.Content.DeleteChildren;
+  URLEdit.Text := '';
+  ActionKindComboBox.ItemIndex := ActionKindComboBox.Items.IndexOf(cHTTPMethodGet);
   FIgnoreTreeViewChange := True;
   try
     FoldersTreeView.Clear;
@@ -938,10 +1006,33 @@ begin
   end;
 end;
 
+procedure TMainView.SaveProfileActionUpdate(Sender: TObject);
+begin
+  SaveProfileAction.Enabled := not FProfile.IsEmpty and not FConfig.ProfileFileName.IsEmpty;
+end;
+
 procedure TMainView.SaveProfileActionExecute(Sender: TObject);
 begin
+  FProfile.SaveToFile(FConfig.ProfileFileName);
+end;
+
+procedure TMainView.SaveProfileAsActionExecute(Sender: TObject);
+var
+  LFolder: string;
+begin
+  if not FConfig.ProfileFileName.IsEmpty then
+    LFolder := TPath.GetDirectoryName(FConfig.ProfileFileName)
+  else
+    LFolder := string.Empty;
+  if not LFolder.IsEmpty and TDirectory.Exists(LFolder) then
+    SaveDialog.InitialDir := LFolder;
   if SaveDialog.Execute then
-    FProfile.SaveToFile(SaveDialog.FileName);
+  begin
+    FConfig.ProfileFileName := SaveDialog.FileName;
+    FConfig.Save;
+    FProfile.SaveToFile(FConfig.ProfileFileName);
+    UpdateCaption;
+  end;
 end;
 
 function TMainView.HasClickedNode: Boolean;
