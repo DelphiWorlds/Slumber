@@ -1,0 +1,82 @@
+[
+  {
+    "Kind": "Accept",
+    "Predefined": [
+      "application/json",
+      "application/octet-stream",
+      "application/xml",     
+      "image/gif",
+      "image/jpeg",
+      "image/png",
+      "text/css",
+      "text/html",
+      "text/plain",
+      "text/xml"
+    ]
+  },
+  {
+    "Kind": "Accept-Charset",
+    "Predefined": [
+      "ISO-8859-1",
+      "UTF-8",
+      "UTF-16",
+      "Windows-1251",
+      "Windows-1252"
+    ]
+  },
+  {
+    "Kind": "Accept-Encoding",
+    "Predefined": [
+      "br",
+      "compress",
+      "deflate",
+      "gzip",
+      "identity"
+    ]
+  },
+  {
+    "Kind": "Access-Control-Request-Headers",
+    "Predefined": [
+      "Accept",
+      "Accept-Language",
+      "Content-Language",
+      "Content-Type",
+      "DPR",
+      "Downlink",
+      "Save-Data",
+      "Viewport-Width",
+      "Width"
+    ]
+  },
+  {
+    "Kind": "Authorization",
+    "Predefined": []
+  },
+  {
+    "Kind": "Cache-Control",
+    "Predefined": []
+  },
+  {
+    "Kind": "Content-Type",
+    "Predefined": [
+      "application/javascript",
+      "application/json",
+      "application/octet-stream",
+      "application/pdf",
+      "application/x-www-form-urlencoded",
+      "application/xml",
+      "application/zip",     
+      "image/gif",
+      "image/jpeg",
+      "image/png",
+      "multipart/form-data",
+      "text/html",
+      "text/plain",
+      "text/xml"
+    ]
+  },
+  {
+    "Kind": "User-Agent",
+    "Predefined": []
+  }
+]  
