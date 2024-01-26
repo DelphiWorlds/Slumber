@@ -18,7 +18,8 @@ uses
   SL.View.RequestNode in 'Views\SL.View.RequestNode.pas' {RequestNodeView: TFrame},
   SL.Config in 'Core\SL.Config.pas',
   SL.Resources in 'Core\SL.Resources.pas',
-  SL.SVGResources in 'Core\SL.SVGResources.pas' {SVGResources: TDataModule};
+  SL.SVGResources in 'Core\SL.SVGResources.pas' {SVGResources: TDataModule},
+  SL.Core in 'Core\SL.Core.pas';
 
 {$R *.res}
 
