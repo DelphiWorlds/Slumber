@@ -22,6 +22,7 @@ type
   public
     MainViewDimensions: TViewDimensions;
     NavigatorLayoutWidth: Single;
+    ProfileFileName: string;
     RequestLayoutWidth: Single;
     ResponseContentMemoWordWrap: Boolean;
     procedure Load;
@@ -78,6 +79,7 @@ begin
     LJSON := TJSONObject.ParseJSONValue(TFile.ReadAllText(GetFileName));
     if LJSON <> nil then
     try
+      LJSON.TryGetValue('ProfileFileName', ProfileFileName);
       LJSON.TryGetValue('NavigatorLayoutWidth', NavigatorLayoutWidth);
       LJSON.TryGetValue('RequestLayoutWidth', RequestLayoutWidth);
       LJSON.TryGetValue('ResponseContentMemoWordWrap', ResponseContentMemoWordWrap);
@@ -95,6 +97,7 @@ var
 begin
   LValue := TJSONObject.Create;
   try
+    LValue.AddPair('ProfileFileName', ProfileFileName);
     LValue.AddPair('NavigatorLayoutWidth', NavigatorLayoutWidth);
     LValue.AddPair('RequestLayoutWidth', RequestLayoutWidth);
     LValue.AddPair('ResponseContentMemoWordWrap', ResponseContentMemoWordWrap);
