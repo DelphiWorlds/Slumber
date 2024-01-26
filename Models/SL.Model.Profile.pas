@@ -75,6 +75,7 @@ type
     constructor Create;
     destructor Destroy; override;
     function AddFolder(const AParent: TSlumberFolder): TSlumberFolder;
+    procedure Clear;
     function FindFolder(const AID: string; out AFolder: TSlumberFolder): Boolean;
     function FindRequest(const AID: string; out ARequest: TSlumberRequest): Boolean;
     function IsEmpty: Boolean;
@@ -194,6 +195,12 @@ constructor TSlumberProfile.Create;
 begin
   inherited;
   FFolders := TSlumberFolders.Create;
+  Clear;
+end;
+
+procedure TSlumberProfile.Clear;
+begin
+  FFolders.Clear;
   FFolders.Add(TSlumberFolder.Create(cRootFolderID));
 end;
 
