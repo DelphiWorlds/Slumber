@@ -13,7 +13,7 @@ type
     DescriptionEdit: TEdit;
     procedure DescriptionEditKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
     procedure DescriptionEditExit(Sender: TObject);
-    procedure DescriptionEditChange(Sender: TObject);
+    procedure DescriptionEditChangeTracking(Sender: TObject);
   private
     FID: string;
     FIsModified: Boolean;
@@ -47,7 +47,7 @@ begin
   EnableEditing(False);
 end;
 
-procedure TRequestNodeView.DescriptionEditChange(Sender: TObject);
+procedure TRequestNodeView.DescriptionEditChangeTracking(Sender: TObject);
 begin
   FIsModified := True;
 end;
@@ -78,7 +78,10 @@ const
 begin
   DescriptionEdit.HitTest := AEnable;
   if AEnable then
-    DescriptionEdit.SetFocus
+  begin
+    DescriptionEdit.SetFocus;
+    DescriptionEdit.SelectAll;
+  end
   else
     DescriptionEdit.ResetFocus;
   DescriptionEdit.Opacity := cEditingOpacity[AEnable];
