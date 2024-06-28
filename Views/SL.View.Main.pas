@@ -141,6 +141,8 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; AFormX, AFormY: Single); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; AFormX, AFormY: Single; DoClick: Boolean = True); override;
   end;
 
 var
@@ -318,6 +320,32 @@ destructor TMainView.Destroy;
 begin
   FProfile.Free;
   inherited;
+end;
+
+procedure TMainView.MouseDown(Button: TMouseButton; Shift: TShiftState; AFormX, AFormY: Single);
+var
+  LHeaderView: THeaderView;
+  I: Integer;
+begin
+  inherited;
+  for I := 0 to RequestHeadersVertScrollBox.Content.ChildrenCount - 1 do
+  begin
+    LHeaderView := THeaderView(RequestHeadersVertScrollBox.Content.Children[I]);
+    LHeaderView.FormMouseDown(Button, Shift, AFormX, AFormY);
+  end;
+end;
+
+procedure TMainView.MouseUp(Button: TMouseButton; Shift: TShiftState; AFormX, AFormY: Single; DoClick: Boolean);
+var
+  LHeaderView: THeaderView;
+  I: Integer;
+begin
+  inherited;
+  for I := 0 to RequestHeadersVertScrollBox.Content.ChildrenCount - 1 do
+  begin
+    LHeaderView := THeaderView(RequestHeadersVertScrollBox.Content.Children[I]);
+    LHeaderView.FormMouseUp(Button, Shift, AFormX, AFormY);
+  end;
 end;
 
 procedure TMainView.NewProfileActionExecute(Sender: TObject);

@@ -42,6 +42,7 @@ object MainView: TMainView
           Size.PlatformDefault = False
           TextSettings.Font.Size = 22.000000000000000000
           TextSettings.Font.StyleExt = {00070000000000000004000000}
+          TextSettings.Trimming = None
           Text = 'Slumber'
           Visible = False
           TabOrder = 0
@@ -102,6 +103,7 @@ object MainView: TMainView
           Size.Width = 37.000000000000000000
           Size.Height = 36.000000000000000000
           Size.PlatformDefault = False
+          TextSettings.Trimming = None
           OnClick = AddItemButtonClick
           object AddItemImage: TImage
             MultiResBitmap = <
@@ -153,6 +155,7 @@ object MainView: TMainView
             CustomIcon = <
               item
               end>
+            TextSettings.Trimming = None
             IsSelected = True
             Size.Width = 63.000000000000000000
             Size.Height = 26.000000000000000000
@@ -185,6 +188,7 @@ object MainView: TMainView
             CustomIcon = <
               item
               end>
+            TextSettings.Trimming = None
             IsSelected = False
             Size.Width = 64.000000000000000000
             Size.Height = 26.000000000000000000
@@ -226,6 +230,7 @@ object MainView: TMainView
             CustomIcon = <
               item
               end>
+            TextSettings.Trimming = None
             IsSelected = False
             Size.Width = 83.000000000000000000
             Size.Height = 26.000000000000000000
@@ -250,7 +255,7 @@ object MainView: TMainView
           Size.Width = 792.000000000000000000
           Size.Height = 806.000000000000000000
           Size.PlatformDefault = False
-          TabIndex = 1
+          TabIndex = 0
           TabOrder = 1
           TabPosition = PlatformDefault
           Sizes = (
@@ -262,7 +267,8 @@ object MainView: TMainView
             CustomIcon = <
               item
               end>
-            IsSelected = False
+            TextSettings.Trimming = None
+            IsSelected = True
             Size.Width = 71.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
@@ -309,6 +315,7 @@ object MainView: TMainView
                 TextSettings.Font.StyleExt = {00070000000000000004000000}
                 TextSettings.FontColor = claLimegreen
                 TextSettings.HorzAlign = Trailing
+                TextSettings.Trimming = None
                 Text = '200'
                 TabOrder = 1
               end
@@ -321,6 +328,7 @@ object MainView: TMainView
                 Size.PlatformDefault = False
                 TextSettings.Font.Size = 16.000000000000000000
                 TextSettings.Font.StyleExt = {00070000000000000004000000}
+                TextSettings.Trimming = None
                 Text = 'OK'
                 TabOrder = 0
               end
@@ -341,7 +349,8 @@ object MainView: TMainView
             CustomIcon = <
               item
               end>
-            IsSelected = True
+            TextSettings.Trimming = None
+            IsSelected = False
             Size.Width = 64.000000000000000000
             Size.Height = 26.000000000000000000
             Size.PlatformDefault = False
@@ -428,7 +437,6 @@ object MainView: TMainView
         object SendButton: TButton
           Action = SendAction
           Align = Right
-          Enabled = True
           ImageIndex = -1
           Margins.Left = 6.000000000000000000
           Margins.Top = 6.000000000000000000
@@ -440,6 +448,7 @@ object MainView: TMainView
           Size.Height = 30.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 5
+          TextSettings.Trimming = None
         end
       end
     end
@@ -459,22 +468,18 @@ object MainView: TMainView
     Top = 302
     object FoldersAddFolderMenuItem: TMenuItem
       Action = AddFolderAction
-      Enabled = True
       ImageIndex = -1
     end
     object FoldersAddRequestMenuItem: TMenuItem
       Action = AddRequestAction
-      Enabled = True
       ImageIndex = -1
     end
     object FoldersEditMenuItem: TMenuItem
       Action = EditItemAction
-      Enabled = True
       ImageIndex = -1
     end
     object FoldersDeleteMenuItem: TMenuItem
       Action = DeleteItemAction
-      Enabled = True
       ImageIndex = -1
     end
     object FoldersMenuSep1: TMenuItem
@@ -482,23 +487,19 @@ object MainView: TMainView
     end
     object NewProfileMenuItem: TMenuItem
       Action = NewProfileAction
-      Enabled = True
       ImageIndex = -1
     end
     object LoadProfileMenuItem: TMenuItem
       Action = LoadProfileAction
-      Enabled = True
       ImageIndex = -1
     end
     object SaveProfileMenuItem: TMenuItem
       Action = SaveProfileAction
-      Enabled = True
       Text = 'Save'
       ImageIndex = -1
     end
     object SaveProfileAsMenuItem: TMenuItem
       Action = SaveProfileAsAction
-      Enabled = True
       ImageIndex = -1
     end
   end
