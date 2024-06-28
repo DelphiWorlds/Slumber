@@ -144,7 +144,6 @@ object HeaderView: THeaderView
       DefaultItemStyles.ItemStyle = ''
       DefaultItemStyles.GroupHeaderStyle = ''
       DefaultItemStyles.GroupFooterStyle = ''
-      Sorted = True
       OnKeyDown = SuggestionListBoxKeyDown
       Viewport.Width = 196.000000000000000000
       Viewport.Height = 196.000000000000000000

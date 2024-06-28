@@ -60,6 +60,8 @@ type
     procedure ShowSuggestions;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure FormMouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+    procedure FormMouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Single);
     function GainFocus: Boolean;
     property HeaderIndex: Integer read GetHeaderIndex write SetHeaderIndex;
     property HeaderName: string read GetHeaderName write SetHeaderName;
@@ -138,6 +140,30 @@ begin
   HeaderValueEdit.SetFocus;
   HeaderValueEdit.SelLength := 0;
   HeaderValueEdit.SelStart := 0;
+end;
+
+procedure THeaderView.FormMouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+var
+  LPoint: TPointF;
+begin
+  if SuggestionListBox.Visible then
+  begin
+    LPoint := SuggestionListBox.AbsoluteToLocal(PointF(X, Y));
+    if SuggestionListBox.BoundsRect.Contains(LPoint) then
+      TOpenControl(SuggestionListBox).MouseDown(Button, Shift, LPoint.X, LPoint.Y);
+  end;
+end;
+
+procedure THeaderView.FormMouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+var
+  LPoint: TPointF;
+begin
+  if SuggestionListBox.Visible then
+  begin
+    LPoint := SuggestionListBox.AbsoluteToLocal(PointF(X, Y));
+    if SuggestionListBox.BoundsRect.Contains(LPoint) then
+      TOpenControl(SuggestionListBox).MouseUp(Button, Shift, LPoint.X, LPoint.Y);
+  end;
 end;
 
 function THeaderView.GainFocus: Boolean;
@@ -227,7 +253,7 @@ procedure THeaderView.FilterSuggestions;
 var
   LMatches, LValues: TArray<string>;
   LSelectedValue, LValue: string;
-  LIndex: Integer;
+  I, LIndex: Integer;
 begin
   LMatches := HeaderValues.GetMatches(HeaderKindComboEdit.Text, HeaderValueEdit.Text);
   LSelectedValue := '';
@@ -237,6 +263,8 @@ begin
   try
     SuggestionListBox.Items.Clear;
     SuggestionListBox.Items.AddStrings(LMatches);
+    for I := 0 to SuggestionListBox.Items.Count - 1 do
+      SuggestionListBox.ListItems[I].HitTest := True;
     LIndex := SuggestionListBox.Items.IndexOf(LSelectedValue);
     if LIndex > -1 then
       SuggestionListBox.ItemIndex := LIndex
@@ -248,14 +276,17 @@ begin
 end;
 
 procedure THeaderView.ShowSuggestions;
+var
+  LPoint: TPointF;
 begin
   FilterSuggestions;
   if SuggestionListBox.Items.Count > 0 then
   begin
+    SuggestionListBox.Width := HeaderValueEdit.Width;
     SuggestionListBox.Position.X := HeaderValueEdit.Position.X;
     SuggestionListBox.Position.Y := HeaderValueEdit.BoundsRect.Bottom + 2;
-    SuggestionListBox.Width := HeaderValueEdit.Width;
     SuggestionListBox.Visible := True;
+    SuggestionListBox.BringToFront;
   end
   else
     SuggestionListBox.Visible := False;
@@ -311,6 +342,7 @@ procedure THeaderView.SetHeaderValue(const Value: string);
 begin
   SetIsActive(True);
   HeaderValueEdit.Text := Value;
+  SuggestionTimer.Enabled := False;
 end;
 
 procedure THeaderView.ActionButtonClick(Sender: TObject);
