@@ -15,8 +15,10 @@ type
     FHeaders: TNetHeaders;
     FHost: string;
     FPort: Integer;
+    function FormEncode(const ARequest: string): string;
     function GetHeader(const AName: string): string;
     function GetURL(const APath: string): string;
+    function IsFormEncoded: Boolean;
     procedure SetHeader(const AName, AValue: string);
   public
     procedure ClearHeaders;
@@ -31,13 +33,33 @@ implementation
 
 uses
   System.Classes, System.SysUtils,
-  System.NetConsts;
+  System.NetConsts, System.NetEncoding;
 
 { THTTPClientEx }
 
 procedure THTTPClientEx.ClearHeaders;
 begin
   FHeaders := [];
+end;
+
+function THTTPClientEx.FormEncode(const ARequest: string): string;
+var
+  LParams: TStrings;
+  I: Integer;
+begin
+  Result := '';
+  LParams := TStringList.Create;
+  try
+    LParams.Text := ARequest;
+    for I := 0 to LParams.Count - 1 do
+    begin
+      if not Result.IsEmpty then
+        Result := Result + '&';
+      Result := Result + TNetEncoding.URL.Encode(LParams.Names[I]) + '=' + TNetEncoding.URL.Encode(LParams.ValueFromIndex[I]);
+    end;
+  finally
+    LParams.Free;
+  end;
 end;
 
 function THTTPClientEx.GetHeader(const AName: string): string;
@@ -55,6 +77,21 @@ begin
   end;
 end;
 
+function THTTPClientEx.IsFormEncoded: Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := 0 to Length(FHeaders) - 1 do
+  begin
+    if FHeaders[I].Value.ToLower.Contains('form-urlencoded') then
+    begin
+      Result := True;
+      Break;
+    end;
+  end;
+end;
+
 function THTTPClientEx.Send(const AMethod: THTTPMethod; const APath: string; const ARequest: string = ''): IHTTPResponse;
 begin
   Result := Send(GetURL(APath), AMethod, ARequest);
@@ -63,12 +100,17 @@ end;
 function THTTPClientEx.Send(const AURL: string; const AMethod: THTTPMethod; const ARequest: string = ''): IHTTPResponse;
 var
   LHTTP: THTTPClient;
-  LRequest: TStream;
+  LRequest: string;
+  LStream: TStream;
 begin
   LHTTP := THTTPClient.Create;
   try
     LHTTP.ConnectionTimeout := 5000;
-    LRequest := TStringStream.Create(ARequest);
+    if IsFormEncoded then
+      LRequest := FormEncode(ARequest)
+    else
+      LRequest := ARequest;
+    LStream := TStringStream.Create(LRequest);
     try
       case AMethod of
         THTTPMethod.Delete:
@@ -76,14 +118,14 @@ begin
         THTTPMethod.Get:
           Result := LHTTP.Get(AURL, nil, FHeaders);
         THTTPMethod.Patch:
-          Result := LHTTP.Patch(AURL, LRequest, nil, FHeaders);
+          Result := LHTTP.Patch(AURL, LStream, nil, FHeaders);
         THTTPMethod.Post:
-          Result := LHTTP.Post(AURL, LRequest, nil, FHeaders);
+          Result := LHTTP.Post(AURL, LStream, nil, FHeaders);
         THTTPMethod.Put:
-          Result := LHTTP.Put(AURL, LRequest, nil, FHeaders);
+          Result := LHTTP.Put(AURL, LStream, nil, FHeaders);
       end;
     finally
-      LRequest.Free;
+      LStream.Free;
     end;
   finally
     LHTTP.Free;
