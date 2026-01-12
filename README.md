@@ -10,6 +10,8 @@ Shamelessly borrows ideas from [Insomnia](https://insomnia.rest)
 
 **NOTE:** As this is work in progress, there may be **substantial refactoring** as the project progresses
 
+**UPDATE**: I've paused development of this tool in preference to the excellent existing tool: **[Bruno](https://www.usebruno.com/)**, which provides the same functionality, and more!
+
 ## Contributors
 
 * Dave Nottage (DPN)
@@ -57,6 +59,10 @@ The color value should be a value that matches the style being used.
 * Implement collections like Postman and Insomnia etc
 
 ## Status
+
+### 12-Jan-2026
+
+Officially paused development (though no changes in 2.5 years anyway) . My preferred tool is now [Bruno](https://www.usebruno.com/) (See [description](#description))
 
 ### 26-Jun-2023
 
